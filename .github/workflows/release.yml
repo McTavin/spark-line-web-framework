@@ -54,6 +54,6 @@ jobs:
           echo "tarball=artifacts/spark-line-web-framework-${version}.tgz" >> "$GITHUB_OUTPUT"
 
       - name: Publish public package
-        run: npm publish "${{ steps.artifact.outputs.tarball }}" --access public --provenance
+        run: npm publish "./${{ steps.artifact.outputs.tarball }}" --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
