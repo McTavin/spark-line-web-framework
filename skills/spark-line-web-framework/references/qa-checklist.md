@@ -53,4 +53,13 @@ At each width verify:
 - Run browser regression tests for unchanged routes.
 - Add or update the component-gallery scenario for every changed reusable
   component.
-- Report remaining deviations with exact affected viewports and components.
+- Report with this fixed schema:
+
+  - `Changed surface`: route, section or component, and project registry ID.
+  - `Registry/gallery`: registry path plus scenarios added or reused.
+  - `Neighborhood`: predecessor, target, successor, and their seam result.
+  - `Viewports`: each audited width and pass/fail result.
+  - `Behavior`: anchors, keyboard, focus, hydration, and reduced motion.
+  - `Checks`: static audit, build, tests, and unchanged-route regression.
+  - `Deviations`: exact component, viewport, evidence, and next action; write
+    `none` only when every required check passed.

@@ -27,9 +27,15 @@ Before editing:
 
 1. Inspect the actual rendered interface, repository implementation, supplied
    export, and component registry.
-2. Open the component gallery when it exists.
-3. Identify the target section plus its immediate predecessor and successor.
-4. Record the target contract:
+2. Look for the project registry at `src/framework/registry.ts`. Honor an
+   existing documented project path when one is already established. The
+   package's `frameworkRegistry` covers framework primitives; it does not
+   replace the project registry.
+3. Open `src/pages/style-guide.astro` when it exists.
+4. If reusable project components exist but the registry or gallery is
+   missing, add them at those conventional paths as part of the implementation.
+5. Identify the target section plus its immediate predecessor and successor.
+6. Record the target contract:
    - theme;
    - container width;
    - top and bottom spacing;
@@ -80,5 +86,9 @@ Run the checklist in [qa-checklist.md](references/qa-checklist.md). At minimum:
 3. Confirm the changed section may move its successor in normal flow but does
    not style or reposition it.
 4. Run existing builds and tests plus the repository's browser checks.
-5. Run `scripts/audit_layout.mjs <paths...>` as an advisory static scan.
-6. Report any deviation; do not silently reinterpret it as an exception.
+5. Resolve this installed skill's directory from the loaded `SKILL.md`, then
+   run `node "<skill-root>/scripts/audit_layout.mjs" <paths...>` as an
+   advisory static scan. Do not resolve the script relative to the consumer
+   repository.
+6. Report results with the fixed schema in `qa-checklist.md`. Report every
+   deviation; do not silently reinterpret one as an exception.
