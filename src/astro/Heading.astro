@@ -1,0 +1,17 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export type HeadingSize = "display" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
+interface Props extends HTMLAttributes<"h2"> {
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+  size?: HeadingSize;
+}
+
+const { level = 2, size = `h${level}` as HeadingSize, class: className, ...attributes } = Astro.props;
+const Tag = `h${level}` as const;
+---
+
+<Tag class:list={["slf-heading", className]} data-size={size} {...attributes}>
+  <slot />
+</Tag>

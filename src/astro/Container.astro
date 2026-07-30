@@ -1,0 +1,15 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import type { ContainerWidth } from "./Section.astro";
+
+interface Props extends HTMLAttributes<"div"> {
+  as?: "div" | "article" | "nav";
+  width?: ContainerWidth;
+}
+
+const { as: Tag = "div", width = "wide", class: className, ...attributes } = Astro.props;
+---
+
+<Tag class:list={["slf-container", className]} data-container={width} {...attributes}>
+  <slot />
+</Tag>

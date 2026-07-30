@@ -1,0 +1,38 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import type { LayoutGap } from "./Stack.astro";
+
+interface Props extends HTMLAttributes<"div"> {
+  as?: "div" | "ul" | "ol";
+  columns?: 1 | 2 | 3 | 4 | 6 | 12 | "auto-fit" | "auto-fill";
+  minItemWidth?: string;
+  gap?: LayoutGap;
+}
+
+const {
+  as: Tag = "div",
+  columns = "auto-fit",
+  minItemWidth = "16rem",
+  gap = "md",
+  class: className,
+  style,
+  ...attributes
+} = Astro.props;
+const inlineStyle = [
+  `--slf-grid-min:${minItemWidth}`,
+  typeof columns === "number" ? `--slf-grid-columns:${columns}` : "",
+  typeof style === "string" ? style : ""
+]
+  .filter(Boolean)
+  .join(";");
+---
+
+<Tag
+  class:list={["slf-grid", className]}
+  data-columns={columns}
+  data-gap={gap}
+  style={inlineStyle}
+  {...attributes}
+>
+  <slot />
+</Tag>

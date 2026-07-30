@@ -1,0 +1,16 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"details"> {
+  summary: string;
+}
+
+const { summary, class: className, ...attributes } = Astro.props;
+---
+
+<details class:list={["slf-disclosure", className]} {...attributes}>
+  <summary>{summary}</summary>
+  <div class="slf-disclosure__content">
+    <slot />
+  </div>
+</details>

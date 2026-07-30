@@ -1,0 +1,66 @@
+---
+import "@spark-line/web-framework/styles/foundation.css";
+import "../styles/project.css";
+import {
+  Heading,
+  PageFlow,
+  Section,
+  Stack,
+  Text
+} from "@spark-line/web-framework/astro";
+import {
+  Carousel,
+  Dialog,
+  Menu,
+  Tabs
+} from "@spark-line/web-framework/react";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>React island fixture</title>
+  </head>
+  <body>
+    <PageFlow>
+      <Section>
+        <Stack gap="lg">
+          <Heading level={1}>Interactive reference islands</Heading>
+          <Text>Astro owns this section and its spacing.</Text>
+          <Tabs
+            client:load
+            label="Project areas"
+            items={[
+              { id: "context", label: "Context", content: "Source material" },
+              { id: "proof", label: "Proof", content: "Verified output" }
+            ]}
+          />
+          <Carousel
+            client:load
+            label="Decisions"
+            items={[
+              { id: "first", label: "Homepage direction" },
+              { id: "second", label: "Navigation decision" }
+            ]}
+          />
+          <Dialog
+            client:load
+            triggerLabel="Read details"
+            title="Project details"
+            description="Reviewed context belongs with the work."
+          />
+          <Menu
+            client:load
+            label="Open menu"
+            items={[
+              { id: "home", label: "Home", href: "/" },
+              { id: "guide", label: "Style guide", href: "/style-guide/" }
+            ]}
+          />
+        </Stack>
+      </Section>
+    </PageFlow>
+  </body>
+</html>

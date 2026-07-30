@@ -1,0 +1,12 @@
+{
+  "name": "fixture-sanity",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node index.mjs"
+  },
+  "dependencies": {
+    "@spark-line/web-framework": "file:__TARBALL__",
+    "sanity": "^4.0.0"
+  }
+}

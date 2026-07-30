@@ -1,0 +1,47 @@
+---
+import "@spark-line/web-framework/styles/foundation.css";
+import "../styles/project.css";
+import {
+  Action,
+  CardShell,
+  Grid,
+  Heading,
+  PageFlow,
+  Section,
+  Stack,
+  Text,
+  VisualFrame
+} from "@spark-line/web-framework/astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Fixture component gallery</title>
+  </head>
+  <body>
+    <PageFlow>
+      <Section spaceTop="lg" spaceBottom="lg">
+        <Stack gap="md">
+          <Heading level={1} size="display">Component gallery</Heading>
+          <Text size="lead">Structural primitives with project-owned tokens.</Text>
+          <Action href="#frames">Inspect frames</Action>
+        </Stack>
+      </Section>
+      <Section id="frames" theme="quiet" spaceTop="lg" spaceBottom="lg">
+        <Grid columns="auto-fit" minItemWidth="16rem">
+          <CardShell>
+            <Heading level={2} size="h4">Independent section</Heading>
+            <Text>This card cannot style its neighbors.</Text>
+          </CardShell>
+          <VisualFrame aspectRatio="4 / 3" class="browser-visual">
+            <Text>Reserved 4 / 3 frame</Text>
+          </VisualFrame>
+        </Grid>
+      </Section>
+    </PageFlow>
+  </body>
+</html>

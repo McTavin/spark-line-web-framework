@@ -1,0 +1,44 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export type SectionTheme = "default" | "inverse" | "accent" | "quiet";
+export type SectionSpace = "none" | "xs" | "sm" | "md" | "lg" | "xl";
+export type ContainerWidth = "narrow" | "content" | "wide" | "full";
+
+interface Props extends HTMLAttributes<"section"> {
+  as?: "section" | "header" | "footer" | "aside" | "div";
+  theme?: SectionTheme;
+  spaceTop?: SectionSpace;
+  spaceBottom?: SectionSpace;
+  container?: ContainerWidth | false;
+}
+
+const {
+  as: Tag = "section",
+  theme = "default",
+  spaceTop = "md",
+  spaceBottom = "md",
+  container = "wide",
+  class: className,
+  ...attributes
+} = Astro.props;
+---
+
+<Tag
+  class:list={["slf-section", className]}
+  data-slf-section
+  data-theme={theme}
+  data-space-top={spaceTop}
+  data-space-bottom={spaceBottom}
+  {...attributes}
+>
+  {
+    container === false ? (
+      <slot />
+    ) : (
+      <div class="slf-container" data-container={container}>
+        <slot />
+      </div>
+    )
+  }
+</Tag>

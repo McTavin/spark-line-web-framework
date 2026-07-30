@@ -1,0 +1,27 @@
+:root {
+  --project-surface-default: Canvas;
+  --project-text-default: CanvasText;
+  --project-surface-quiet: Canvas;
+  --project-text-quiet: CanvasText;
+  --project-card-border: 1px solid currentColor;
+  --project-action-border: 1px solid currentColor;
+  --project-action-background: CanvasText;
+  --project-action-foreground: Canvas;
+  --project-action-secondary-background: Canvas;
+  --project-action-secondary-foreground: CanvasText;
+}
+
+html {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.starter-frame {
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+}

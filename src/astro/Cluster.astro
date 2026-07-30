@@ -1,0 +1,30 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import type { LayoutGap } from "./Stack.astro";
+
+interface Props extends HTMLAttributes<"div"> {
+  as?: "div" | "nav" | "ul";
+  gap?: LayoutGap;
+  align?: "start" | "center" | "end" | "stretch";
+  justify?: "start" | "center" | "end" | "between";
+}
+
+const {
+  as: Tag = "div",
+  gap = "sm",
+  align = "center",
+  justify = "start",
+  class: className,
+  ...attributes
+} = Astro.props;
+---
+
+<Tag
+  class:list={["slf-cluster", className]}
+  data-gap={gap}
+  data-align={align}
+  data-justify={justify}
+  {...attributes}
+>
+  <slot />
+</Tag>

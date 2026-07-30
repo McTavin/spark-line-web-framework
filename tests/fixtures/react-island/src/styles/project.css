@@ -1,0 +1,38 @@
+:root {
+  --project-surface-default: Canvas;
+  --project-text-default: CanvasText;
+  --project-surface-quiet: Canvas;
+  --project-text-quiet: CanvasText;
+  --project-card-border: 1px solid currentColor;
+  --project-action-border: 1px solid currentColor;
+}
+
+html {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+a {
+  min-block-size: 2.75rem;
+}
+
+[role="tablist"],
+[data-slf-island="carousel"] > div:last-child {
+  display: flex;
+  gap: 0.75rem;
+}
+
+dialog {
+  max-inline-size: min(28rem, calc(100% - 2rem));
+}
+
+.browser-visual {
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+}

@@ -1,0 +1,26 @@
+---
+import "@spark-line/web-framework/styles/foundation.css";
+import {
+  Heading,
+  PageFlow,
+  Section,
+  Text
+} from "@spark-line/web-framework/astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Astro-only fixture</title>
+  </head>
+  <body>
+    <PageFlow>
+      <Section>
+        <Heading level={1}>Astro only</Heading>
+        <Text>No island runtime.</Text>
+      </Section>
+    </PageFlow>
+  </body>
+</html>

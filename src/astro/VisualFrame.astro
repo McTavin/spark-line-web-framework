@@ -1,0 +1,32 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"div"> {
+  as?: "div" | "figure";
+  aspectRatio?: string;
+  minBlockSize?: string;
+  overflow?: "clip" | "hidden" | "visible";
+}
+
+const {
+  as: Tag = "div",
+  aspectRatio,
+  minBlockSize,
+  overflow = "clip",
+  class: className,
+  style,
+  ...attributes
+} = Astro.props;
+const inlineStyle = [
+  aspectRatio ? `--slf-visual-aspect:${aspectRatio}` : "",
+  minBlockSize ? `--slf-visual-min-block:${minBlockSize}` : "",
+  `--slf-visual-overflow:${overflow}`,
+  typeof style === "string" ? style : ""
+]
+  .filter(Boolean)
+  .join(";");
+---
+
+<Tag class:list={["slf-visual-frame", className]} data-slf-visual-frame style={inlineStyle} {...attributes}>
+  <slot />
+</Tag>

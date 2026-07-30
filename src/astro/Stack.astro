@@ -1,0 +1,16 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export type LayoutGap = "none" | "xs" | "sm" | "md" | "lg" | "xl";
+
+interface Props extends HTMLAttributes<"div"> {
+  as?: "div" | "section" | "article" | "ul" | "ol";
+  gap?: LayoutGap;
+}
+
+const { as: Tag = "div", gap = "md", class: className, ...attributes } = Astro.props;
+---
+
+<Tag class:list={["slf-stack", className]} data-gap={gap} {...attributes}>
+  <slot />
+</Tag>

@@ -1,0 +1,76 @@
+---
+import "@spark-line/web-framework/styles/foundation.css";
+import "../styles/project.css";
+import {
+  Action,
+  CardShell,
+  Cluster,
+  Disclosure,
+  Grid,
+  Heading,
+  PageFlow,
+  Section,
+  SectionGroup,
+  Stack,
+  Text,
+  VisualFrame
+} from "@spark-line/web-framework/astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Component gallery</title>
+  </head>
+  <body>
+    <PageFlow>
+      <Section theme="default" spaceTop="lg" spaceBottom="lg">
+        <Stack gap="md">
+          <Text size="small">Unlinked development route</Text>
+          <Heading level={1} size="display">Component gallery</Heading>
+          <Text size="lead">Every registered variant and meaningful state belongs here.</Text>
+        </Stack>
+      </Section>
+
+      <SectionGroup mode="joined">
+        <Section theme="quiet" spaceTop="lg" spaceBottom="lg">
+          <Stack gap="md">
+            <Heading level={2} size="h2">Actions and surfaces</Heading>
+            <Cluster>
+              <Action href="#layout">Primary</Action>
+              <Action href="#layout" variant="secondary">Secondary</Action>
+              <Action href="#layout" variant="quiet">Quiet</Action>
+            </Cluster>
+            <Grid columns="auto-fit" minItemWidth="14rem">
+              {
+                ["default", "quiet", "accent"].map((surface) => (
+                  <CardShell surface={surface}>
+                    <Heading level={3} size="h4">{surface}</Heading>
+                    <Text>Project tokens supply this surface.</Text>
+                  </CardShell>
+                ))
+              }
+            </Grid>
+          </Stack>
+        </Section>
+
+        <Section id="layout" theme="default" spaceTop="lg" spaceBottom="lg">
+          <Grid columns={2}>
+            <Stack gap="sm">
+              <Heading level={2} size="h3">Native disclosure</Heading>
+              <Disclosure summary="What owns section spacing?">
+                <Text>The section owns both internal vertical edges.</Text>
+              </Disclosure>
+            </Stack>
+            <VisualFrame aspectRatio="16 / 9" class="starter-frame">
+              <Text>16 / 9 reserved frame</Text>
+            </VisualFrame>
+          </Grid>
+        </Section>
+      </SectionGroup>
+    </PageFlow>
+  </body>
+</html>

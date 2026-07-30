@@ -1,0 +1,13 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"main"> {
+  as?: "main" | "div";
+}
+
+const { as: Tag = "main", class: className, ...attributes } = Astro.props;
+---
+
+<Tag class:list={["slf-page-flow", className]} data-slf-page-flow {...attributes}>
+  <slot />
+</Tag>

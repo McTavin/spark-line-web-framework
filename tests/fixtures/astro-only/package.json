@@ -1,0 +1,12 @@
+{
+  "name": "fixture-astro-only",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro build"
+  },
+  "dependencies": {
+    "@spark-line/web-framework": "file:__TARBALL__",
+    "astro": "^7.0.3"
+  }
+}

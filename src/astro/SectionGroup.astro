@@ -1,0 +1,14 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"div"> {
+  as?: "div" | "section";
+  mode?: "joined" | "overlap";
+}
+
+const { as: Tag = "div", mode = "joined", class: className, ...attributes } = Astro.props;
+---
+
+<Tag class:list={["slf-section-group", className]} data-slf-section-group data-mode={mode} {...attributes}>
+  <slot />
+</Tag>

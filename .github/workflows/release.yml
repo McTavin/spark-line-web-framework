@@ -1,0 +1,59 @@
+name: Release package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate source and types
+        run: npm run check
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Create release tarball
+        run: npm run pack:artifact
+
+      - name: Verify packed fixtures
+        run: npm run test:fixtures
+
+      - name: Install browser for interaction checks
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify interactions, accessibility, and screenshots
+        run: npm run test:browser
+
+      - name: Inspect release tarball
+        run: npm run pack:inspect
+
+      - name: Resolve verified artifact
+        id: artifact
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          echo "tarball=artifacts/spark-line-web-framework-${version}.tgz" >> "$GITHUB_OUTPUT"
+
+      - name: Publish public package
+        run: npm publish "${{ steps.artifact.outputs.tarball }}" --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

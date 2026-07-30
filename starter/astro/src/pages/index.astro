@@ -1,0 +1,48 @@
+---
+import "@spark-line/web-framework/styles/foundation.css";
+import "../styles/project.css";
+import {
+  Action,
+  CardShell,
+  Grid,
+  Heading,
+  PageFlow,
+  Section,
+  Stack,
+  Text,
+  VisualFrame
+} from "@spark-line/web-framework/astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Spark Line framework starter</title>
+  </head>
+  <body>
+    <PageFlow>
+      <Section theme="default" spaceTop="xl" spaceBottom="lg">
+        <Stack gap="md">
+          <Heading level={1} size="display">Structure without visual inheritance</Heading>
+          <Text size="lead">Supply the project's reviewed tokens and content.</Text>
+          <Action href="#proof">See the proof</Action>
+        </Stack>
+      </Section>
+      <Section id="proof" theme="quiet" spaceTop="lg" spaceBottom="xl">
+        <Grid columns="auto-fit" minItemWidth="15rem">
+          <CardShell>
+            <Stack gap="sm">
+              <Heading level={2} size="h4">Section-owned edges</Heading>
+              <Text>Changing this card cannot restyle the following section.</Text>
+            </Stack>
+          </CardShell>
+          <VisualFrame aspectRatio="4 / 3" class="starter-frame">
+            <Text>Reserved visual space</Text>
+          </VisualFrame>
+        </Grid>
+      </Section>
+    </PageFlow>
+  </body>
+</html>
