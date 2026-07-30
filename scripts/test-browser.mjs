@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import { spawn } from "node:child_process";
+import { once } from "node:events";
 import {
   access,
   mkdir,
@@ -19,8 +20,15 @@ await access(path.join(fixture, "dist", "index.html"));
 await mkdir(screenshotDirectory, { recursive: true });
 
 const server = spawn(
-  "npm",
-  ["run", "preview", "--", "--host", "127.0.0.1", "--port", String(port)],
+  process.execPath,
+  [
+    path.join(fixture, "node_modules", "astro", "bin", "astro.mjs"),
+    "preview",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    String(port)
+  ],
   {
     cwd: fixture,
     env: {
@@ -116,7 +124,7 @@ try {
     await browser.close();
   }
 } finally {
-  server.kill("SIGTERM");
+  await stopServer(server);
 }
 
 console.log(`Browser verification passed. Artifacts: ${screenshotDirectory}`);
@@ -133,6 +141,23 @@ async function waitForServer(url) {
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
   throw new Error(`Preview server did not start.\n${serverLog}`);
+}
+
+async function stopServer(child) {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+
+  const exited = once(child, "exit");
+  child.kill("SIGTERM");
+  const stopped = await Promise.race([
+    exited.then(() => true),
+    new Promise((resolve) => setTimeout(() => resolve(false), 2_000))
+  ]);
+
+  if (!stopped && child.exitCode === null && child.signalCode === null) {
+    const forcedExit = once(child, "exit");
+    child.kill("SIGKILL");
+    await forcedExit;
+  }
 }
 
 async function assertNoOverflow(page) {
