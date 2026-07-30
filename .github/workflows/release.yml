@@ -55,5 +55,3 @@ jobs:
 
       - name: Publish public package
         run: npm publish "./${{ steps.artifact.outputs.tarball }}" --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
