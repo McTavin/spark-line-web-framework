@@ -1,5 +1,13 @@
 export type ComponentKind = "primitive" | "section" | "island" | "pattern" | "composition";
 export type ComponentStatus = "stable" | "experimental" | "deprecated";
+export const WEB_FRAMEWORK_LAYOUT_PROFILE_ID = "@spark-line/web-framework/layout-v1" as const;
+export type CompositionRole = "section" | "container" | "layout" | "surface" | "content" | "control" | "composition";
+
+export interface ComponentComposition {
+  profile: typeof WEB_FRAMEWORK_LAYOUT_PROFILE_ID | string;
+  role: CompositionRole;
+  exceptions: readonly string[];
+}
 
 export interface CatalogScenario {
   id: string;
@@ -14,6 +22,7 @@ export interface ComponentDefinition<Variant extends string = string> {
   status: ComponentStatus;
   provenance: string;
   scenarios: readonly CatalogScenario[];
+  composition?: ComponentComposition;
 }
 
 export interface ComponentRegistry<
@@ -65,7 +74,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["main", "div"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "default", label: "Page flow" }]
+    scenarios: [{ id: "default", label: "Page flow" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "composition", exceptions: [] }
   },
   {
     id: "section",
@@ -76,7 +86,8 @@ export const frameworkRegistry = defineComponentRegistry([
     scenarios: [
       { id: "themes", label: "Themes" },
       { id: "spacing", label: "Spacing edges" }
-    ]
+    ],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "section", exceptions: [] }
   },
   {
     id: "section-group",
@@ -84,7 +95,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["joined", "overlap"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "modes", label: "Grouping modes" }]
+    scenarios: [{ id: "modes", label: "Grouping modes" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "composition", exceptions: [] }
   },
   {
     id: "container",
@@ -92,7 +104,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["narrow", "content", "wide", "full"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "widths", label: "Container widths" }]
+    scenarios: [{ id: "widths", label: "Container widths" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "container", exceptions: [] }
   },
   {
     id: "stack",
@@ -100,7 +113,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["none", "xs", "sm", "md", "lg", "xl"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "gaps", label: "Vertical gaps" }]
+    scenarios: [{ id: "gaps", label: "Vertical gaps" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "layout", exceptions: [] }
   },
   {
     id: "cluster",
@@ -108,7 +122,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["start", "center", "end", "between"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "alignment", label: "Wrapped alignment" }]
+    scenarios: [{ id: "alignment", label: "Wrapped alignment" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "layout", exceptions: [] }
   },
   {
     id: "grid",
@@ -116,7 +131,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["fixed", "auto-fit", "auto-fill"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "responsive", label: "Responsive columns" }]
+    scenarios: [{ id: "responsive", label: "Responsive columns" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "layout", exceptions: [] }
   },
   {
     id: "visual-frame",
@@ -124,7 +140,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["aspect-ratio", "reserved-block-size"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "reserved-space", label: "Reserved visual space" }]
+    scenarios: [{ id: "reserved-space", label: "Reserved visual space" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "surface", exceptions: [] }
   },
   {
     id: "heading",
@@ -132,7 +149,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["display", "h1", "h2", "h3", "h4", "h5", "h6"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "scale", label: "Project type scale" }]
+    scenarios: [{ id: "scale", label: "Project type scale" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "content", exceptions: [] }
   },
   {
     id: "text",
@@ -140,7 +158,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["small", "body", "lead", "muted"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "scale", label: "Text roles" }]
+    scenarios: [{ id: "scale", label: "Text roles" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "content", exceptions: [] }
   },
   {
     id: "action",
@@ -148,7 +167,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["primary", "secondary", "quiet"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "states", label: "Actions and focus states" }]
+    scenarios: [{ id: "states", label: "Actions and focus states" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   },
   {
     id: "card-shell",
@@ -156,7 +176,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["default", "quiet", "accent"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "surfaces", label: "Project card surfaces" }]
+    scenarios: [{ id: "surfaces", label: "Project card surfaces" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "surface", exceptions: [] }
   },
   {
     id: "disclosure",
@@ -164,7 +185,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["closed", "open"],
     status: "stable",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "native", label: "Native disclosure" }]
+    scenarios: [{ id: "native", label: "Native disclosure" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   },
   {
     id: "tabs",
@@ -172,7 +194,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["default"],
     status: "experimental",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "keyboard", label: "Keyboard tabs" }]
+    scenarios: [{ id: "keyboard", label: "Keyboard tabs" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   },
   {
     id: "carousel",
@@ -180,7 +203,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["default"],
     status: "experimental",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "controls", label: "Previous and next controls" }]
+    scenarios: [{ id: "controls", label: "Previous and next controls" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   },
   {
     id: "dialog",
@@ -188,7 +212,8 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["modal"],
     status: "experimental",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "native", label: "Native modal dialog" }]
+    scenarios: [{ id: "native", label: "Native modal dialog" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   },
   {
     id: "menu",
@@ -196,6 +221,7 @@ export const frameworkRegistry = defineComponentRegistry([
     variants: ["links"],
     status: "experimental",
     provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "keyboard", label: "Keyboard menu" }]
+    scenarios: [{ id: "keyboard", label: "Keyboard menu" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   }
 ] as const);

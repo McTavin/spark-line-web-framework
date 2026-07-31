@@ -121,6 +121,13 @@ system manifest builder. A catalog entry records framework, kind, variants,
 scenarios, status, assets, optional package export and lineage, plus an exact
 Git repository, repository-relative path, and 40-character commit SHA.
 
+Catalog manifests also declare `@spark-line/web-framework/layout-v1` once.
+Each component references that profile with a small composition contract:
+`role` states what the component owns and `exceptions` records deliberate,
+reviewable departures. The profile keeps section, container, child-layout,
+surface, content, and control responsibilities consistent without supplying a
+palette or turning component composition into a layout DSL.
+
 ```ts
 import {
   createFrameworkCatalogManifest,

@@ -3,6 +3,8 @@ import test from "node:test";
 
 import {
   CATALOG_SCHEMA_VERSION,
+  WEB_FRAMEWORK_LAYOUT_PROFILE,
+  WEB_FRAMEWORK_LAYOUT_PROFILE_ID,
   createFrameworkCatalogManifest,
   defineCatalogManifest,
   serializeCatalogManifest,
@@ -22,7 +24,8 @@ function component(id, framework = "astro") {
     scenarios: [{ id: "default", label: "Default" }],
     status: "stable",
     source: { repository: "https://example.test/framework.git", path: `src/${id}.astro`, commit },
-    package: { name: "@spark-line/web-framework", version: "0.2.0", export: "./astro" }
+    package: { name: "@spark-line/web-framework", version: "0.2.0", export: "./astro" },
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "layout", exceptions: [] }
   };
 }
 
@@ -30,6 +33,7 @@ test("catalog manifests validate exact Git provenance", () => {
   const manifest = defineCatalogManifest({
     schema_version: CATALOG_SCHEMA_VERSION,
     generated_from: { repository: "https://example.test/framework.git", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
     components: [component("stack")]
   });
 
@@ -41,6 +45,7 @@ test("catalog validation rejects inferred frameworks and floating refs", () => {
   const invalid = {
     schema_version: 1,
     generated_from: { repository: "repo", path: "catalog.json", commit: "main" },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
     components: [component("card", "vue")]
   };
   const result = validateCatalogManifest(invalid);
@@ -53,7 +58,8 @@ test("catalog validation rejects inferred frameworks and floating refs", () => {
 test("serialization is deterministic across component order", () => {
   const base = {
     schema_version: 1,
-    generated_from: { repository: "repo", path: "catalog.json", commit }
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE]
   };
   const left = serializeCatalogManifest({ ...base, components: [component("text"), component("action")] });
   const right = serializeCatalogManifest({ ...base, components: [component("action"), component("text")] });
@@ -71,4 +77,25 @@ test("framework catalog declares Astro and React parity for stable presentationa
   assert.equal(manifest.components.length, 16);
   for (const frameworks of pairs.values()) assert.deepEqual([...frameworks].sort(), ["astro", "react"]);
   assert.ok(manifest.components.every((component) => component.scope === "system"));
+  assert.deepEqual(manifest.composition_profiles, [WEB_FRAMEWORK_LAYOUT_PROFILE]);
+  assert.ok(manifest.components.every((component) => component.composition.profile === WEB_FRAMEWORK_LAYOUT_PROFILE_ID));
+});
+
+test("catalog validation requires declared composition profiles and roles", () => {
+  const missingProfile = {
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [],
+    components: [component("stack")]
+  };
+  const undeclaredRole = {
+    ...missingProfile,
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    components: [{ ...component("stack"), composition: {
+      profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "webflow", exceptions: []
+    } }]
+  };
+
+  assert.ok(validateCatalogManifest(missingProfile).errors.some((error) => error.includes("composition_profiles")));
+  assert.ok(validateCatalogManifest(undeclaredRole).errors.some((error) => error.includes("composition.role")));
 });

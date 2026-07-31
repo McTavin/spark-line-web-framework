@@ -1,11 +1,49 @@
-import type { CatalogScenario, ComponentKind, ComponentStatus } from "../registry/index.js";
-import { frameworkRegistry } from "../registry/index.js";
+import type { CatalogScenario, ComponentComposition, ComponentKind, ComponentStatus, CompositionRole } from "../registry/index.js";
+import { frameworkRegistry, WEB_FRAMEWORK_LAYOUT_PROFILE_ID } from "../registry/index.js";
+
+export { WEB_FRAMEWORK_LAYOUT_PROFILE_ID };
 
 export const CATALOG_SCHEMA_VERSION = 1 as const;
 
 export type CatalogFramework = "astro" | "react";
 export type CatalogScope = "system" | "workspace";
 export type CatalogAvailability = ComponentStatus | "unavailable";
+
+export interface CatalogCompositionRole {
+  id: CompositionRole;
+  owns: string;
+}
+
+export interface CatalogCompositionProfile {
+  id: string;
+  version: number;
+  description: string;
+  supported_frameworks: readonly CatalogFramework[];
+  roles: readonly CatalogCompositionRole[];
+  rules: readonly string[];
+}
+
+export const WEB_FRAMEWORK_LAYOUT_PROFILE = Object.freeze<CatalogCompositionProfile>({
+  id: WEB_FRAMEWORK_LAYOUT_PROFILE_ID,
+  version: 1,
+  description: "Neutral ownership boundaries for composing reusable web components.",
+  supported_frameworks: ["astro", "react"],
+  roles: [
+    { id: "section", owns: "Its theme and block padding within the page flow." },
+    { id: "container", owns: "Inline gutters, centering, and maximum content width." },
+    { id: "layout", owns: "Child arrangement, wrapping, alignment, and gap." },
+    { id: "surface", owns: "Internal padding and semantic surface treatment." },
+    { id: "content", owns: "Semantic hierarchy and content presentation." },
+    { id: "control", owns: "Interaction behavior, state, focus, and accessible naming." },
+    { id: "composition", owns: "Coordination of roles inside its own boundary." }
+  ],
+  rules: [
+    "Use semantic tokens supplied by the active workspace variant.",
+    "Do not use reusable component roots to create arbitrary external block spacing.",
+    "Do not reach into adjacent sections with sibling selectors or repair adjacency with ordinary negative margins.",
+    "React islands do not own page-level theme, container width, or section spacing."
+  ]
+});
 
 export interface GitSourceReference {
   repository: string;
@@ -47,11 +85,13 @@ export interface CatalogComponent {
   assets?: readonly CatalogAssetRequirement[];
   lineage?: CatalogLineage;
   tags?: readonly string[];
+  composition: ComponentComposition;
 }
 
 export interface CatalogManifest {
   schema_version: typeof CATALOG_SCHEMA_VERSION;
   generated_from: GitSourceReference;
+  composition_profiles: readonly CatalogCompositionProfile[];
   components: readonly CatalogComponent[];
 }
 
@@ -87,7 +127,26 @@ export function validateCatalogManifest(input: unknown): CatalogValidationResult
   if (manifest.schema_version !== CATALOG_SCHEMA_VERSION) errors.push(`schema_version must be ${CATALOG_SCHEMA_VERSION}`);
   if (!manifest.generated_from) errors.push("generated_from is required");
   else validateSource(manifest.generated_from, "generated_from", errors);
+  if (!Array.isArray(manifest.composition_profiles) || manifest.composition_profiles.length === 0) {
+    errors.push("composition_profiles must not be empty");
+  }
   if (!Array.isArray(manifest.components)) errors.push("components must be an array");
+
+  const profiles = new Map<string, CatalogCompositionProfile>();
+  for (const [index, profile] of (manifest.composition_profiles ?? []).entries()) {
+    const label = `composition_profiles[${index}]`;
+    if (!profile?.id?.trim()) errors.push(`${label}.id is required`);
+    else if (profiles.has(profile.id)) errors.push(`${label}.id duplicates ${profile.id}`);
+    if (!Number.isInteger(profile?.version) || profile.version < 1) errors.push(`${label}.version must be a positive integer`);
+    if (!profile?.description?.trim()) errors.push(`${label}.description is required`);
+    if (!Array.isArray(profile?.supported_frameworks) || profile.supported_frameworks.length === 0
+      || profile.supported_frameworks.some((framework) => !frameworks.has(framework))) {
+      errors.push(`${label}.supported_frameworks must contain only astro or react`);
+    }
+    if (!Array.isArray(profile?.roles) || profile.roles.length === 0) errors.push(`${label}.roles must not be empty`);
+    if (!Array.isArray(profile?.rules) || profile.rules.length === 0) errors.push(`${label}.rules must not be empty`);
+    if (profile?.id) profiles.set(profile.id, profile);
+  }
 
   const keys = new Set<string>();
   for (const [index, component] of (manifest.components ?? []).entries()) {
@@ -106,6 +165,20 @@ export function validateCatalogManifest(input: unknown): CatalogValidationResult
     if (component.lineage) validateSource(component.lineage.source, `${label}.lineage.source`, errors);
     if (component.package && (!component.package.name || !component.package.version || !component.package.export)) {
       errors.push(`${label}.package requires name, version, and export`);
+    }
+    if (!component.composition) errors.push(`${label}.composition is required`);
+    else {
+      const profile = profiles.get(component.composition.profile);
+      if (!profile) errors.push(`${label}.composition.profile must reference a declared profile`);
+      else if (!profile.roles.some((role) => role.id === component.composition.role)) {
+        errors.push(`${label}.composition.role is not declared by ${profile.id}`);
+      } else if (!profile.supported_frameworks.includes(component.framework)) {
+        errors.push(`${label}.framework is not supported by ${profile.id}`);
+      }
+      if (!Array.isArray(component.composition.exceptions)
+        || component.composition.exceptions.some((exception) => typeof exception !== "string" || !exception.trim())) {
+        errors.push(`${label}.composition.exceptions must be an array of non-empty strings`);
+      }
     }
 
     const key = `${component.scope}:${component.workspace_id ?? "system"}:${component.framework}:${component.id}`;
@@ -127,6 +200,7 @@ export function serializeCatalogManifest(manifest: CatalogManifest): string {
   if (!result.valid) throw new Error(`Invalid component catalog:\n${result.errors.map((error) => `- ${error}`).join("\n")}`);
   const deterministic = {
     ...manifest,
+    composition_profiles: [...manifest.composition_profiles].sort((a, b) => a.id.localeCompare(b.id)),
     components: [...manifest.components].sort((a, b) => {
       const left = `${a.scope}:${a.workspace_id ?? ""}:${a.framework}:${a.id}`;
       const right = `${b.scope}:${b.workspace_id ?? ""}:${b.framework}:${b.id}`;
@@ -178,6 +252,7 @@ export function createFrameworkCatalogManifest({
           version: "0.2.0",
           export: framework === "astro" ? "./astro" : "./react"
         },
+        composition: definition.composition!,
         tags: ["universal", "presentational", id]
       });
     }
@@ -185,6 +260,7 @@ export function createFrameworkCatalogManifest({
   return defineCatalogManifest({
     schema_version: CATALOG_SCHEMA_VERSION,
     generated_from: { repository, path: "src/catalog/index.ts", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
     components
   });
 }
