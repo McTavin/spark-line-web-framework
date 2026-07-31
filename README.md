@@ -15,7 +15,7 @@ island.
 Pin an exact version while the API is young:
 
 ```sh
-npm install @spark-line/web-framework@0.1.0
+npm install @spark-line/web-framework@0.2.0
 ```
 
 Astro is required. React, React DOM, and Sanity are optional peer dependencies
@@ -86,11 +86,14 @@ uses semantic slots rather than a palette:
 
 The registry is available from `@spark-line/web-framework/registry`.
 
-## React islands
+## React primitives and islands
 
-The React export contains reference `Tabs`, `Carousel`, `Dialog`, and `Menu`
-islands. Props are serializable data. Astro still owns the outer section,
-surface, container, and spacing.
+The React export contains presentational `Action`, `Heading`, `Text`,
+`CardShell`, `Stack`, `Cluster`, `Grid`, and `Container` equivalents plus the
+reference `Tabs`, `Carousel`, `Dialog`, and `Menu` islands. Presentational
+primitives emit the same semantic classes and data slots as Astro; project CSS
+still owns palette and visual identity. Props for hydrated islands are
+serializable data.
 
 ```astro
 ---
@@ -109,6 +112,27 @@ import { Tabs } from "@spark-line/web-framework/react";
 
 Use `client:visible` or `client:idle` by default. Use `client:load` only when the
 interaction must be available immediately.
+
+## Exact-ref catalog manifests
+
+`@spark-line/web-framework/catalog` provides the framework-neutral catalog
+schema, validation, deterministic serialization, and the seeded Astro/React
+system manifest builder. A catalog entry records framework, kind, variants,
+scenarios, status, assets, optional package export and lineage, plus an exact
+Git repository, repository-relative path, and 40-character commit SHA.
+
+```ts
+import {
+  createFrameworkCatalogManifest,
+  serializeCatalogManifest
+} from "@spark-line/web-framework/catalog";
+
+const manifest = createFrameworkCatalogManifest({ commit: process.env.GITHUB_SHA });
+const json = serializeCatalogManifest(manifest);
+```
+
+Repository CI runs `npm run catalog:export -- --commit "$GITHUB_SHA"`. The
+export fails when the commit or any declared source path is unavailable.
 
 ## Sanity adapter
 
@@ -167,5 +191,5 @@ npm run pack:inspect
 
 `pack:artifact` creates the single release tarball. Fixture tests, inspection,
 and publication all use that same file rather than silently repacking it.
-Releases are immutable. Tag the exact verified commit as `v0.1.0`; the included
+Releases are immutable. Tag the exact verified commit as `v0.2.0`; the included
 workflow publishes the verified tarball with npm provenance.

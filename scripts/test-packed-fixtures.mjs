@@ -30,7 +30,16 @@ if (tarballs.length !== 1) {
 const [tarballName] = tarballs;
 const tarball = path.join(artifacts, tarballName);
 
-for (const fixture of ["astro-only", "react-island", "sanity"]) {
+const supportedFixtures = ["astro-only", "react-island", "sanity"];
+const requestedFixtures = process.argv.slice(2);
+const fixtures = requestedFixtures.length ? requestedFixtures : supportedFixtures;
+
+for (const fixture of fixtures) {
+  if (!supportedFixtures.includes(fixture)) {
+    throw new Error(
+      `Unknown fixture ${fixture}. Choose one of: ${supportedFixtures.join(", ")}`
+    );
+  }
   const target = path.join(work, fixture);
   await cp(path.join(fixtureSource, fixture), target, { recursive: true });
 
@@ -66,7 +75,9 @@ for (const fixture of ["astro-only", "react-island", "sanity"]) {
   }
 }
 
-console.log(`Verified one packed tarball in 3 clean fixtures: ${tarballName}`);
+console.log(
+  `Verified one packed tarball in ${fixtures.length} clean fixture${fixtures.length === 1 ? "" : "s"}: ${tarballName}`
+);
 
 async function assertMissing(target, label) {
   try {

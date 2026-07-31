@@ -1,4 +1,4 @@
-export type ComponentKind = "primitive" | "section" | "island" | "pattern";
+export type ComponentKind = "primitive" | "section" | "island" | "pattern" | "composition";
 export type ComponentStatus = "stable" | "experimental" | "deprecated";
 
 export interface CatalogScenario {
