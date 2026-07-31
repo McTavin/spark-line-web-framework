@@ -128,6 +128,27 @@ reviewable departures. The profile keeps section, container, child-layout,
 surface, content, and control responsibilities consistent without supplying a
 palette or turning component composition into a layout DSL.
 
+CMS-capable projects may also declare the optional
+`@spark-line/web-framework/sanity-v1` content profile. A component binding names
+project-defined typed view models, not individual CMS documents:
+
+```ts
+{
+  content_profiles: [WEB_FRAMEWORK_SANITY_PROFILE],
+  components: [{
+    // component metadata...
+    content: {
+      profile: WEB_FRAMEWORK_SANITY_PROFILE_ID,
+      models: ["product", "service"]
+    }
+  }]
+}
+```
+
+Content bindings are compatibility metadata. Component source remains exact-ref
+Git authority, while CMS records retain their own document and revision
+identity outside the component catalog.
+
 ```ts
 import {
   createFrameworkCatalogManifest,

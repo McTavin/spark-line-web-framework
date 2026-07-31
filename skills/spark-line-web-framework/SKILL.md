@@ -42,6 +42,9 @@ Before editing:
    - layout variant;
    - reserved visual dimensions;
    - Astro, Sanity, and React ownership boundaries.
+7. When a catalog match declares a content profile, treat its model IDs as
+   compatibility metadata. Retrieve actual CMS records through the project's
+   authenticated content path, never through the component catalog.
 
 When a reference points to an existing site component, use its real structure
 and approved tokens. Do not approximate it from memory.
@@ -68,6 +71,9 @@ is involved.
   island inside an Astro-owned frame.
 - Let Sanity store content and controlled variant values. Do not store arbitrary
   CSS classes or page markup.
+- Keep component code Git-authoritative. A CMS-backed component consumes a
+  typed project view model; individual product or service records are not
+  components.
 - Use project-supplied semantic tokens. Do not introduce a package palette.
 - Use `VisualFrame` for floating or absolutely positioned visuals and reserve
   their dimensions before they load.
