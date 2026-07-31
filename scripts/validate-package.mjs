@@ -9,6 +9,7 @@ const expectedExports = [
   "./react",
   "./sanity",
   "./registry",
+  "./catalog",
   "./styles/foundation.css"
 ];
 
@@ -18,7 +19,7 @@ for (const key of expectedExports) {
 }
 
 if (manifest.name !== "@spark-line/web-framework") failures.push("unexpected package name");
-if (manifest.version !== "0.1.0") failures.push("unexpected package version");
+if (manifest.version !== "0.2.0") failures.push("unexpected package version");
 if (!manifest.peerDependencies?.astro) failures.push("Astro must be a peer dependency");
 for (const optionalPeer of ["react", "react-dom", "sanity"]) {
   if (!manifest.peerDependenciesMeta?.[optionalPeer]?.optional) {

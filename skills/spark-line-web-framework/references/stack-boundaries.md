@@ -32,6 +32,11 @@ adjacent-section layout.
 
 Map Sanity `_type` values to registered Astro section IDs.
 
+Keep page composition in code and normalize Sanity documents through one typed
+view-model layer shared by published and authenticated draft rendering. CMS
+records such as products and services keep their document identity and revision
+outside the component catalog.
+
 Preserve:
 
 - `_key`;
@@ -40,6 +45,14 @@ Preserve:
 - references and asset provenance;
 - preview and Stega metadata;
 - the original source record for visual editing.
+
+Keep Stega metadata in editable text nodes. Clean encoded values before using
+them in attributes, URLs, identifiers, comparisons, or application logic. Give
+composed fields stable edit targets, and suppress text splitting or
+layout-altering motion only in authenticated draft preview.
+
+Localized array values use stable `_key` values plus an explicit language field.
+Treat CMS publishing and repository publishing as separate release boundaries.
 
 Expose constrained enums for theme, spacing, and layout. Do not expose arbitrary
 CSS classes or freeform page markup.

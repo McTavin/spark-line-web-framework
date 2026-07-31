@@ -1,0 +1,191 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import {
+  CATALOG_SCHEMA_VERSION,
+  WEB_FRAMEWORK_LAYOUT_PROFILE,
+  WEB_FRAMEWORK_LAYOUT_PROFILE_ID,
+  WEB_FRAMEWORK_SANITY_PROFILE,
+  WEB_FRAMEWORK_SANITY_PROFILE_ID,
+  createFrameworkCatalogManifest,
+  defineCatalogManifest,
+  serializeCatalogManifest,
+  validateCatalogManifest
+} from "../dist/catalog/index.js";
+
+const commit = "0123456789abcdef0123456789abcdef01234567";
+
+function component(id, framework = "astro") {
+  return {
+    id,
+    name: id,
+    framework,
+    kind: "primitive",
+    scope: "system",
+    variants: ["default"],
+    scenarios: [{ id: "default", label: "Default" }],
+    status: "stable",
+    source: { repository: "https://example.test/framework.git", path: `src/${id}.astro`, commit },
+    package: { name: "@spark-line/web-framework", version: "0.2.0", export: "./astro" },
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "layout", exceptions: [] }
+  };
+}
+
+test("catalog manifests validate exact Git provenance", () => {
+  const manifest = defineCatalogManifest({
+    schema_version: CATALOG_SCHEMA_VERSION,
+    generated_from: { repository: "https://example.test/framework.git", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [],
+    components: [component("stack")]
+  });
+
+  assert.equal(manifest.components[0].source.commit, commit);
+  assert.deepEqual(validateCatalogManifest(manifest), { valid: true, errors: [] });
+});
+
+test("catalog validation rejects inferred frameworks and floating refs", () => {
+  const invalid = {
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit: "main" },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [],
+    components: [component("card", "vue")]
+  };
+  const result = validateCatalogManifest(invalid);
+
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((error) => error.includes("full lowercase Git SHA")));
+  assert.ok(result.errors.some((error) => error.includes("astro or react")));
+});
+
+test("serialization is deterministic across component order", () => {
+  const base = {
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: []
+  };
+  const left = serializeCatalogManifest({ ...base, components: [component("text"), component("action")] });
+  const right = serializeCatalogManifest({ ...base, components: [component("action"), component("text")] });
+
+  assert.equal(left, right);
+});
+
+test("framework catalog declares Astro and React parity for stable presentational primitives", () => {
+  const manifest = createFrameworkCatalogManifest({ commit });
+  const pairs = new Map();
+  for (const component of manifest.components) {
+    if (!pairs.has(component.id)) pairs.set(component.id, new Set());
+    pairs.get(component.id).add(component.framework);
+  }
+  assert.equal(manifest.components.length, 16);
+  for (const frameworks of pairs.values()) assert.deepEqual([...frameworks].sort(), ["astro", "react"]);
+  assert.ok(manifest.components.every((component) => component.scope === "system"));
+  assert.deepEqual(manifest.composition_profiles, [WEB_FRAMEWORK_LAYOUT_PROFILE]);
+  assert.deepEqual(manifest.content_profiles, [WEB_FRAMEWORK_SANITY_PROFILE]);
+  assert.ok(manifest.components.every((component) => component.content === undefined));
+  assert.ok(manifest.components.every((component) => component.composition.profile === WEB_FRAMEWORK_LAYOUT_PROFILE_ID));
+});
+
+test("catalog validation requires declared composition profiles and roles", () => {
+  const missingProfile = {
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [],
+    content_profiles: [],
+    components: [component("stack")]
+  };
+  const undeclaredRole = {
+    ...missingProfile,
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    components: [{ ...component("stack"), composition: {
+      profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "webflow", exceptions: []
+    } }]
+  };
+
+  assert.ok(validateCatalogManifest(missingProfile).errors.some((error) => error.includes("composition_profiles")));
+  assert.ok(validateCatalogManifest(undeclaredRole).errors.some((error) => error.includes("composition.role")));
+});
+
+test("catalog content bindings reference declared profiles and project-defined models", () => {
+  const serviceCard = {
+    ...component("service-card"),
+    content: { profile: WEB_FRAMEWORK_SANITY_PROFILE_ID, models: ["service", "product"] }
+  };
+  const manifest = defineCatalogManifest({
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [WEB_FRAMEWORK_SANITY_PROFILE],
+    components: [serviceCard]
+  });
+
+  assert.deepEqual(manifest.components[0].content.models, ["service", "product"]);
+  assert.deepEqual(validateCatalogManifest(manifest), { valid: true, errors: [] });
+});
+
+test("catalog validation rejects undeclared content profiles and invalid model identifiers", () => {
+  const invalid = {
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [],
+    components: [{
+      ...component("service-card"),
+      content: { profile: WEB_FRAMEWORK_SANITY_PROFILE_ID, models: ["Service Card"] }
+    }]
+  };
+  const result = validateCatalogManifest(invalid);
+
+  assert.ok(result.errors.some((error) => error.includes("content.profile")));
+  assert.ok(result.errors.some((error) => error.includes("content.models")));
+});
+
+test("catalog validation rejects duplicate content capabilities and models", () => {
+  const duplicateProfile = {
+    ...WEB_FRAMEWORK_SANITY_PROFILE,
+    capabilities: ["published", "published"]
+  };
+  const result = validateCatalogManifest({
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [duplicateProfile],
+    components: [{
+      ...component("service-card"),
+      content: { profile: WEB_FRAMEWORK_SANITY_PROFILE_ID, models: ["service", "service"] }
+    }]
+  });
+
+  assert.ok(result.errors.some((error) => error.includes("capabilities must not contain duplicates")));
+  assert.ok(result.errors.some((error) => error.includes("models must not contain duplicates")));
+});
+
+test("serialization normalizes content capability and model order", () => {
+  const reverseProfile = {
+    ...WEB_FRAMEWORK_SANITY_PROFILE,
+    capabilities: [...WEB_FRAMEWORK_SANITY_PROFILE.capabilities].reverse()
+  };
+  const base = {
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE]
+  };
+  const left = serializeCatalogManifest({
+    ...base,
+    content_profiles: [WEB_FRAMEWORK_SANITY_PROFILE],
+    components: [{ ...component("service-card"), content: {
+      profile: WEB_FRAMEWORK_SANITY_PROFILE_ID, models: ["product", "service"]
+    } }]
+  });
+  const right = serializeCatalogManifest({
+    ...base,
+    content_profiles: [reverseProfile],
+    components: [{ ...component("service-card"), content: {
+      profile: WEB_FRAMEWORK_SANITY_PROFILE_ID, models: ["service", "product"]
+    } }]
+  });
+
+  assert.equal(left, right);
+});
