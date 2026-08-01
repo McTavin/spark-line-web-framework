@@ -1,66 +1,97 @@
 name: Release package
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Exact verified commit to publish
+        required: true
+        type: string
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  publish:
+  candidate:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out release commit
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Prefer installed Chrome
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install --with-deps chromium
+          fi
+      - name: Build one SHA-bound candidate
+        run: |
+          echo "V1423_RELEASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          npm run verify:full
+      - uses: actions/upload-artifact@v4
+        with:
+          name: framework-release-candidate-${{ inputs.release_ref }}
+          path: artifacts/
+          if-no-files-found: error
 
-      - name: Use Node 24
-        uses: actions/setup-node@v4
+  publish:
+    needs: candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_ref }}
+      - uses: actions/setup-node@v4
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Validate source and types
-        run: npm run check
-
-      - name: Run unit tests
-        run: npm test
-
-      - name: Export exact-ref component catalog
-        run: npm run catalog:export -- --commit "${GITHUB_SHA}" --output artifacts/component-catalog.json
-
-      - name: Upload component catalog
-        uses: actions/upload-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: component-catalog-${{ github.sha }}
-          path: artifacts/component-catalog.json
-
-      - name: Create release tarball
-        run: npm run pack:artifact
-
-      - name: Verify packed fixtures
-        run: npm run test:fixtures
-
-      - name: Install browser for interaction checks
-        run: npx playwright install --with-deps chromium
-
-      - name: Verify interactions, accessibility, and screenshots
-        run: npm run test:browser
-
-      - name: Inspect release tarball
-        run: npm run pack:inspect
-
-      - name: Resolve verified artifact
-        id: artifact
+          name: framework-release-candidate-${{ inputs.release_ref }}
+          path: artifacts
+      - name: Verify candidate identity and digests
+        id: candidate
         run: |
-          version="$(node -p 'require("./package.json").version')"
-          echo "tarball=artifacts/spark-line-web-framework-${version}.tgz" >> "$GITHUB_OUTPUT"
-
-      - name: Publish public package
-        run: npm publish "./${{ steps.artifact.outputs.tarball }}" --access public --provenance
+          node --input-type=module -e '
+            import { createHash } from "node:crypto";
+            import { readFile, readdir } from "node:fs/promises";
+            const manifest = JSON.parse(await readFile("artifacts/release-candidate.json", "utf8"));
+            const head = process.env.RELEASE_REF;
+            if (manifest.commit_sha !== head) throw new Error(`candidate ${manifest.commit_sha} != ${head}`);
+            for (const [file, expected] of Object.entries(manifest.artifacts)) {
+              if (file === "release-candidate.json") continue;
+              const actual = `sha256-${createHash("sha256").update(await readFile(`artifacts/${file}`)).digest("hex")}`;
+              if (actual !== expected) throw new Error(`digest mismatch: ${file}`);
+            }
+            const tarball = (await readdir("artifacts")).find((file) => file.endsWith(".tgz"));
+            if (!tarball) throw new Error("candidate tarball missing");
+            await import("node:fs/promises").then(({ appendFile }) => appendFile(process.env.GITHUB_OUTPUT, `tarball=${tarball}\nversion=${manifest.version}\n`));
+          '
+        env:
+          RELEASE_REF: ${{ inputs.release_ref }}
+      - name: Publish through npm Trusted Publishing
+        run: npm publish "./artifacts/${{ steps.candidate.outputs.tarball }}" --access public --provenance
+      - name: Verify npm registry and create release tag
+        env:
+          VERSION: ${{ steps.candidate.outputs.version }}
+        run: |
+          EXPECTED_INTEGRITY="$(node -e "const fs=require('fs'),c=require('crypto');process.stdout.write('sha512-'+c.createHash('sha512').update(fs.readFileSync('artifacts/${{ steps.candidate.outputs.tarball }}')).digest('base64'))")"
+          for attempt in 1 2 3 4 5 6; do
+            REGISTRY_INTEGRITY="$(npm view "@spark-line/web-framework@${VERSION}" dist.integrity 2>/dev/null || true)"
+            if [ "${REGISTRY_INTEGRITY}" = "${EXPECTED_INTEGRITY}" ]; then
+              git tag "v${VERSION}" "${{ inputs.release_ref }}"
+              git push origin "v${VERSION}"
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1

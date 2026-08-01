@@ -1,0 +1,33 @@
+name: Verify changed framework surface
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  changed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Prefer installed Chrome
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install --with-deps chromium
+          fi
+      - name: Verify changed surface
+        run: npm run verify:changed
+        env:
+          VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          VERIFY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

@@ -15,7 +15,7 @@ island.
 Pin an exact version while the API is young:
 
 ```sh
-npm install @spark-line/web-framework@0.2.0
+npm install @spark-line/web-framework@0.2.1
 ```
 
 Astro is required. React, React DOM, and Sanity are optional peer dependencies
@@ -81,8 +81,9 @@ uses semantic slots rather than a palette:
 2. Reuse an exact registered component.
 3. Add a typed variant when semantics and behavior are unchanged.
 4. Compose existing primitives.
-5. Create and register a component only for new structure or behavior.
-6. Add every meaningful state to the component gallery.
+5. Create a project-owned component only for new structure or behavior.
+6. Register it when reuse is intentional, repeated, or explicitly requested;
+   new reusable entries begin experimental.
 
 The registry is available from `@spark-line/web-framework/registry`.
 
@@ -194,8 +195,8 @@ Unknown section policy is explicitly `omit`, `preserve`, or `throw`.
 ## Component gallery
 
 Copy `starter/astro/src/pages/style-guide.astro` into a project. The route is
-unlinked and includes `noindex, nofollow`. Register every new component and
-show every meaningful state before considering it reusable.
+unlinked and includes `noindex, nofollow`. Register intentionally reusable
+components and show meaningful states before requesting stable status.
 
 ## v14.23 guidance
 
@@ -209,15 +210,13 @@ dependencies automatically.
 
 ```sh
 npm ci
-npm run check
-npm test
-npm run pack:artifact
-npm run test:fixtures
-npm run test:browser
-npm run pack:inspect
+npm run verify:changed
+npm run verify:full
 ```
 
-`pack:artifact` creates the single release tarball. Fixture tests, inspection,
-and publication all use that same file rather than silently repacking it.
-Releases are immutable. Tag the exact verified commit as `v0.2.0`; the included
-workflow publishes the verified tarball with npm provenance.
+`verify:changed` selects boundary-relevant fixtures and browser coverage.
+`verify:full` builds once and produces one SHA-bound release-candidate bundle
+with the tarball, catalog, dependency resolution, digests, browser evidence,
+and screenshots. The publish job downloads and verifies that candidate, uses
+npm Trusted Publishing, polls registry integrity, and creates `v0.2.1` only
+after the registry matches.

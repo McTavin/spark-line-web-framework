@@ -1,6 +1,6 @@
 {
   "name": "@spark-line/web-framework",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Structural UI contracts and accessible primitives for Astro, optional React islands, and optional Sanity section data.",
   "type": "module",
   "license": "MIT",
@@ -48,13 +48,16 @@
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/build.mjs",
     "check": "tsc -p tsconfig.build.json --noEmit && node scripts/validate-package.mjs",
-    "catalog:export": "npm run build && node scripts/export-framework-catalog.mjs",
+    "catalog:export": "node scripts/export-framework-catalog.mjs",
     "clean": "node scripts/clean.mjs",
-    "test": "npm run build && node --test tests/*.test.mjs",
+    "test": "npm run build && npm run test:unit",
+    "test:unit": "node --test tests/*.test.mjs",
     "pack:artifact": "node scripts/create-pack.mjs",
     "test:fixtures": "node scripts/test-packed-fixtures.mjs",
     "test:browser": "node scripts/test-browser.mjs",
     "pack:inspect": "node scripts/inspect-pack.mjs",
+    "verify:changed": "node scripts/verify-changed.mjs",
+    "verify:full": "npm run build && npm run check && npm run test:unit && npm run catalog:export && npm run pack:artifact && npm run test:fixtures && npm run test:browser && npm run pack:inspect && node scripts/create-release-candidate.mjs",
     "prepack": "npm run build && npm run check && npm test"
   },
   "peerDependencies": {

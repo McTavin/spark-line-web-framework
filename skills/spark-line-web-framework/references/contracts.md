@@ -7,7 +7,8 @@ Use this decision sequence:
 1. Exact registry match.
 2. Typed variant of the same semantics and behavior.
 3. Composition from primitives.
-4. New registered component.
+4. New project-owned component; register it when reuse is intentional, repeated,
+   or explicitly requested.
 
 A visual resemblance alone does not justify a new component. A new semantic
 role, DOM structure, interaction model, or content contract does.
@@ -62,7 +63,7 @@ unreserved document height or cover the following section by accident.
 
 ## Registry record
 
-Register:
+When registration is warranted, register:
 
 - stable component ID;
 - `primitive`, `section`, `island`, or `pattern` kind;
@@ -71,5 +72,7 @@ Register:
 - provenance;
 - at least one component-gallery scenario.
 
-Do not call a component reusable until its relevant responsive, focus, empty,
-loading, error, and reduced-motion states are represented where applicable.
+New reusable entries begin experimental. Do not call one stable until its
+relevant responsive, focus, empty, loading, error, and reduced-motion states are
+verified where applicable and the owner approves stability. Promotion into the
+universal framework is reviewed and never automatic.
