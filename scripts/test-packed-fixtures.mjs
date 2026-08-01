@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   cp,
   mkdir,
@@ -32,6 +33,9 @@ if (tarballs.length !== 1) {
 }
 const [tarballName] = tarballs;
 const tarball = path.join(artifacts, tarballName);
+const tarballIntegrity = `sha512-${createHash("sha512")
+  .update(await readFile(tarball))
+  .digest("base64")}`;
 
 const supportedFixtures = ["astro-only", "react-island", "sanity"];
 const requestedFixtures = process.argv.slice(2);
@@ -52,8 +56,16 @@ await Promise.all(fixtures.map(async (fixture) => {
   const lockPath = path.join(target, "package-lock.json");
   let hasLock = true;
   try {
-    const lock = await readFile(lockPath, "utf8");
-    await writeFile(lockPath, lock.replaceAll("__TARBALL__", tarball), "utf8");
+    const lock = JSON.parse(await readFile(lockPath, "utf8"));
+    const rootPackage = lock.packages?.[""];
+    const frameworkPackage = lock.packages?.["node_modules/@spark-line/web-framework"];
+    if (!rootPackage?.dependencies || !frameworkPackage) {
+      throw new Error(`${fixture} lockfile is missing the framework dependency`);
+    }
+    rootPackage.dependencies["@spark-line/web-framework"] = `file:${tarball}`;
+    frameworkPackage.resolved = `file:${tarball}`;
+    frameworkPackage.integrity = tarballIntegrity;
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`, "utf8");
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
     hasLock = false;
