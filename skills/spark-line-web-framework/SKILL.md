@@ -32,8 +32,9 @@ Before editing:
    package's `frameworkRegistry` covers framework primitives; it does not
    replace the project registry.
 3. Open `src/pages/style-guide.astro` when it exists.
-4. If reusable project components exist but the registry or gallery is
-   missing, add them at those conventional paths as part of the implementation.
+4. Project components may ship project-owned without catalog ceremony. Register
+   one when reuse is intentional, it is encountered again, or the owner selects
+   it for future discovery.
 5. Identify the target section plus its immediate predecessor and successor.
 6. Record the target contract:
    - theme;
@@ -55,9 +56,12 @@ and approved tokens. Do not approximate it from memory.
 2. Add a typed variant when structure, semantics, and behavior are unchanged.
 3. Compose registered primitives.
 4. Create a component only for genuinely new structure or behavior.
-5. Register every new component with ID, kind, approved variants, status,
-   provenance, and at least one catalog scenario.
-6. Add every meaningful state to the component gallery.
+5. When registering, include ID, kind, composition role, variants, experimental
+   or stable status, exact provenance, and at least one meaningful scenario.
+6. Stability requires relevant verification and owner approval. Universal
+   promotion requires repeated verified usefulness or an explicit owner choice;
+   it is never automatic.
+7. Add meaningful states to the component gallery for registered components.
 
 Read [contracts.md](references/contracts.md) before changing section composition.
 Read [stack-boundaries.md](references/stack-boundaries.md) when Sanity or React
@@ -98,3 +102,9 @@ Run the checklist in [qa-checklist.md](references/qa-checklist.md). At minimum:
    repository.
 6. Report results with the fixed schema in `qa-checklist.md`. Report every
    deviation; do not silently reinterpret one as an exception.
+
+For repository delivery, Save performs Git protection only. Preview should
+reach a reviewable immutable deployment quickly with the repository's targeted
+checks. Publish runs the complete verification profile against that unchanged
+candidate before production moves. Do not describe a Preview as fully verified
+unless the repository intentionally used its full fallback profile.

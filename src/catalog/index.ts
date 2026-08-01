@@ -329,7 +329,7 @@ export function createFrameworkCatalogManifest({
         },
         package: {
           name: "@spark-line/web-framework",
-          version: "0.2.0",
+          version: "0.2.1",
           export: framework === "astro" ? "./astro" : "./react"
         },
         composition: definition.composition!,

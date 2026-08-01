@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import {
   cp,
   mkdir,
@@ -9,6 +9,9 @@ import {
   writeFile
 } from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 const root = path.resolve(import.meta.dirname, "..");
 const work = path.join(root, "tests", ".fixture-work");
@@ -34,7 +37,7 @@ const supportedFixtures = ["astro-only", "react-island", "sanity"];
 const requestedFixtures = process.argv.slice(2);
 const fixtures = requestedFixtures.length ? requestedFixtures : supportedFixtures;
 
-for (const fixture of fixtures) {
+await Promise.all(fixtures.map(async (fixture) => {
   if (!supportedFixtures.includes(fixture)) {
     throw new Error(
       `Unknown fixture ${fixture}. Choose one of: ${supportedFixtures.join(", ")}`
@@ -46,23 +49,30 @@ for (const fixture of fixtures) {
   const packagePath = path.join(target, "package.json");
   const manifest = await readFile(packagePath, "utf8");
   await writeFile(packagePath, manifest.replace("__TARBALL__", tarball), "utf8");
+  const lockPath = path.join(target, "package-lock.json");
+  let hasLock = true;
+  try {
+    const lock = await readFile(lockPath, "utf8");
+    await writeFile(lockPath, lock.replaceAll("__TARBALL__", tarball), "utf8");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    hasLock = false;
+  }
 
-  execFileSync(
+  await execFileAsync(
     "npm",
-    ["install", "--ignore-scripts", "--no-audit", "--no-fund"],
+    [hasLock ? "ci" : "install", "--ignore-scripts", "--no-audit", "--no-fund"],
     {
       cwd: target,
-      encoding: "utf8",
       env: { ...process.env, npm_config_cache: npmCache },
-      stdio: "inherit"
+      maxBuffer: 10 * 1024 * 1024
     }
   );
 
-  execFileSync("npm", ["run", fixture === "sanity" ? "test" : "build"], {
+  await execFileAsync("npm", ["run", fixture === "sanity" ? "test" : "build"], {
     cwd: target,
-    encoding: "utf8",
     env: { ...process.env, npm_config_cache: npmCache },
-    stdio: "inherit"
+    maxBuffer: 10 * 1024 * 1024
   });
 
   if (fixture === "astro-only") {
@@ -73,7 +83,7 @@ for (const fixture of fixtures) {
   if (fixture === "react-island") {
     await assertMissing(path.join(target, "node_modules", "sanity"), "sanity");
   }
-}
+}));
 
 console.log(
   `Verified one packed tarball in ${fixtures.length} clean fixture${fixtures.length === 1 ? "" : "s"}: ${tarballName}`

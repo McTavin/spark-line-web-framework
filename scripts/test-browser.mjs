@@ -51,12 +51,17 @@ try {
   await waitForServer(`${origin}/`);
 
   const launchOptions = { headless: true };
+  if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
+    launchOptions.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  }
   const localChrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-  try {
-    await access(localChrome);
-    launchOptions.executablePath = localChrome;
-  } catch {
-    // CI uses the Playwright-managed Chromium installed by the release workflow.
+  if (!launchOptions.executablePath) {
+    try {
+      await access(localChrome);
+      launchOptions.executablePath = localChrome;
+    } catch {
+      // CI uses an installed Chrome binary before falling back to Playwright Chromium.
+    }
   }
 
   const browser = await chromium.launch(launchOptions);

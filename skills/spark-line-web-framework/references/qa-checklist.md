@@ -63,3 +63,8 @@ At each width verify:
   - `Checks`: static audit, build, tests, and unchanged-route regression.
   - `Deviations`: exact component, viewport, evidence, and next action; write
     `none` only when every required check passed.
+
+Preview evidence is optimized for review and may use targeted checks. Complete
+browser, accessibility, and responsive assurance belongs to the full Publish
+profile for the unchanged candidate unless risk classification requires it
+earlier.
