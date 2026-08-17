@@ -1,7 +1,18 @@
 import type { CatalogScenario, ComponentComposition, ComponentKind, ComponentStatus, CompositionRole } from "../registry/index.js";
 import { frameworkRegistry, WEB_FRAMEWORK_LAYOUT_PROFILE_ID } from "../registry/index.js";
+import {
+  LUMOS_FOR_ASTRO_COMMIT,
+  LUMOS_FOR_ASTRO_GENERATED_FROM_PATH,
+  LUMOS_FOR_ASTRO_REPOSITORY,
+  lumosForAstroComponents
+} from "./lumos-for-astro.js";
 
 export { WEB_FRAMEWORK_LAYOUT_PROFILE_ID };
+export {
+  LUMOS_FOR_ASTRO_COMMIT,
+  LUMOS_FOR_ASTRO_GENERATED_FROM_PATH,
+  LUMOS_FOR_ASTRO_REPOSITORY
+};
 
 export const CATALOG_SCHEMA_VERSION = 1 as const;
 export const WEB_FRAMEWORK_SANITY_PROFILE_ID = "@spark-line/web-framework/sanity-v1" as const;
@@ -152,13 +163,25 @@ const statuses = new Set<CatalogAvailability>([
   "deprecated",
   "unavailable"
 ]);
+const assetKinds = new Set<CatalogAssetRequirement["kind"]>(["asset", "font", "license"]);
+const assetStatuses = new Set<CatalogAssetRequirement["status"]>(["available", "unavailable"]);
 
-function validateSource(source: GitSourceReference, label: string, errors: string[]) {
-  if (!source.repository.trim()) errors.push(`${label}.repository is required`);
-  if (!source.path.trim() || source.path.startsWith("/") || source.path.split("/").includes("..")) {
+function validateSource(source: unknown, label: string, errors: string[]) {
+  const candidate = source as Partial<GitSourceReference> | null;
+  if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
+    errors.push(`${label} must be an exact Git source`);
+    return;
+  }
+  if (typeof candidate.repository !== "string" || !candidate.repository.trim()) {
+    errors.push(`${label}.repository is required`);
+  }
+  if (typeof candidate.path !== "string" || !candidate.path.trim()
+    || candidate.path.startsWith("/") || candidate.path.split("/").includes("..")) {
     errors.push(`${label}.path must be repository-relative`);
   }
-  if (!commitPattern.test(source.commit)) errors.push(`${label}.commit must be a full lowercase Git SHA`);
+  if (typeof candidate.commit !== "string" || !commitPattern.test(candidate.commit)) {
+    errors.push(`${label}.commit must be a full lowercase Git SHA`);
+  }
 }
 
 export function validateCatalogManifest(input: unknown): CatalogValidationResult {
@@ -226,7 +249,48 @@ export function validateCatalogManifest(input: unknown): CatalogValidationResult
     if (!Array.isArray(component.scenarios) || component.scenarios.length === 0) errors.push(`${label}.scenarios must not be empty`);
     if (component.source) validateSource(component.source, `${label}.source`, errors);
     else errors.push(`${label}.source is required`);
-    if (component.lineage) validateSource(component.lineage.source, `${label}.lineage.source`, errors);
+    if (component.assets !== undefined) {
+      if (!Array.isArray(component.assets)) {
+        errors.push(`${label}.assets must be an array`);
+      } else {
+        const assetIds = new Set<string>();
+        for (const [assetIndex, value] of component.assets.entries()) {
+          const assetLabel = `${label}.assets[${assetIndex}]`;
+          const asset = value as Partial<CatalogAssetRequirement> | null;
+          if (!asset || typeof asset !== "object" || Array.isArray(asset)) {
+            errors.push(`${assetLabel} must be a canonical asset requirement`);
+            continue;
+          }
+          if (!idPattern.test(asset.id ?? "")) {
+            errors.push(`${assetLabel}.id must be a stable lowercase identifier`);
+          } else if (assetIds.has(asset.id!)) {
+            errors.push(`${assetLabel}.id duplicates ${asset.id}`);
+          } else {
+            assetIds.add(asset.id!);
+          }
+          if (!assetKinds.has(asset.kind as CatalogAssetRequirement["kind"])) {
+            errors.push(`${assetLabel}.kind must be asset, font, or license`);
+          }
+          if (!assetStatuses.has(asset.status as CatalogAssetRequirement["status"])) {
+            errors.push(`${assetLabel}.status must be available or unavailable`);
+          }
+          if (asset.note !== undefined && (typeof asset.note !== "string" || !asset.note.trim())) {
+            errors.push(`${assetLabel}.note must be a non-empty string when provided`);
+          }
+        }
+      }
+    }
+    if (component.lineage !== undefined) {
+      const lineage = component.lineage as Partial<CatalogLineage> | null;
+      if (!lineage || typeof lineage !== "object" || Array.isArray(lineage)) {
+        errors.push(`${label}.lineage must be a canonical lineage reference`);
+      } else {
+        if (!idPattern.test(lineage.component_id ?? "")) {
+          errors.push(`${label}.lineage.component_id must be a stable lowercase identifier`);
+        }
+        validateSource(lineage.source, `${label}.lineage.source`, errors);
+      }
+    }
     if (component.package && (!component.package.name || !component.package.version || !component.package.export)) {
       errors.push(`${label}.package requires name, version, and export`);
     }
@@ -345,3 +409,15 @@ export function createFrameworkCatalogManifest({
     components
   });
 }
+
+export const LUMOS_FOR_ASTRO_CATALOG_MANIFEST = defineCatalogManifest({
+  schema_version: CATALOG_SCHEMA_VERSION,
+  generated_from: {
+    repository: LUMOS_FOR_ASTRO_REPOSITORY,
+    path: LUMOS_FOR_ASTRO_GENERATED_FROM_PATH,
+    commit: LUMOS_FOR_ASTRO_COMMIT
+  },
+  composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+  content_profiles: [],
+  components: lumosForAstroComponents
+});

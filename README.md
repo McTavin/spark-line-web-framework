@@ -163,6 +163,33 @@ const json = serializeCatalogManifest(manifest);
 Repository CI runs `npm run catalog:export -- --commit "$GITHUB_SHA"`. The
 export fails when the commit or any declared source path is unavailable.
 
+### External Lumos source catalog
+
+The catalog export also exposes `LUMOS_FOR_ASTRO_CATALOG_MANIFEST` as a
+separate system manifest for the 19 components in
+[`lumosframework/lumos-for-astro`](https://github.com/lumosframework/lumos-for-astro).
+It is pinned to commit `455bac567bb5757f3953779a113b1c7cfc6da8a4` and keeps
+every entry `experimental`. The entries are namespaced as `lumos.*`, retain
+the upstream MIT license and shared CSS requirements, and include no package
+metadata: the upstream repository is exact Git source, not an importable npm
+export at that ref.
+
+Serialize it independently from the Spark Line package manifest because the
+two manifests have different `generated_from` repositories:
+
+```ts
+import {
+  LUMOS_FOR_ASTRO_CATALOG_MANIFEST,
+  serializeCatalogManifest
+} from "@spark-line/web-framework/catalog";
+
+const lumosJson = serializeCatalogManifest(LUMOS_FOR_ASTRO_CATALOG_MANIFEST);
+```
+
+The upstream `BaseHead`, `Nav`, and `Footer` include site-specific constants,
+assets, and routes; their catalog exceptions identify the required adaptation.
+Catalog discovery does not copy Lumos source into this package.
+
 ## Sanity adapter
 
 The Sanity export has no runtime import from `sanity`. It provides typed
