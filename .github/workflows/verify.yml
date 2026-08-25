@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: framework-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   changed:
     runs-on: ubuntu-latest
@@ -14,12 +18,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Plan verification
+        id: plan
+        run: node scripts/verify-changed.mjs --plan
+        env:
+          VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD^' }}
+          VERIFY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          VERIFY_FORCE_FULL: ${{ github.event_name == 'workflow_dispatch' }}
       - uses: actions/setup-node@v4
+        if: steps.plan.outputs.needs_dependencies == 'true'
         with:
           node-version: 24
           cache: npm
       - run: npm ci
+        if: steps.plan.outputs.needs_dependencies == 'true'
       - name: Prefer installed Chrome
+        if: steps.plan.outputs.needs_browser == 'true'
         run: |
           if command -v google-chrome >/dev/null 2>&1; then
             echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
@@ -27,7 +41,8 @@ jobs:
             npx playwright install --with-deps chromium
           fi
       - name: Verify changed surface
-        run: npm run verify:changed
+        run: node scripts/verify-changed.mjs
         env:
-          VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD^' }}
           VERIFY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          VERIFY_FORCE_FULL: ${{ github.event_name == 'workflow_dispatch' }}

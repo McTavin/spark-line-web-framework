@@ -89,22 +89,29 @@ is involved.
 
 Run the checklist in [qa-checklist.md](references/qa-checklist.md). At minimum:
 
-1. Inspect the changed section and both adjacent sections at desktop, tablet,
-   and narrow mobile widths.
+1. Inspect the changed section and both adjacent sections at the viewport widths
+   affected by the diff. Start with one desktop and one narrow-mobile width;
+   add tablet, 320px, or the complete matrix only when breakpoint, overflow, or
+   explicit acceptance criteria make them relevant.
 2. Check seam, gap, overlap, overflow, theme inheritance, DOM order, anchor
    behavior, and hydration boundaries.
 3. Confirm the changed section may move its successor in normal flow but does
    not style or reposition it.
-4. Run existing builds and tests plus the repository's browser checks.
+4. Treat the repository's changed-surface or risk-selected verification plan as
+   authoritative. Run only the checks selected for the current diff and exact
+   SHA. Do not add a full build, unit, browser, or unchanged-route suite merely
+   as a second ceremonial gate.
 5. Resolve this installed skill's directory from the loaded `SKILL.md`, then
-   run `node "<skill-root>/scripts/audit_layout.mjs" <paths...>` as an
-   advisory static scan. Do not resolve the script relative to the consumer
-   repository.
-6. Report results with the fixed schema in `qa-checklist.md`. Report every
+   run `node "<skill-root>/scripts/audit_layout.mjs" <paths...>` only when the
+   changed paths include section composition, layout CSS, or visual-frame
+   behavior. Do not resolve the script relative to the consumer repository.
+6. Reuse successful evidence for the unchanged SHA. Rerun a check only when its
+   inputs, environment, prior result, or concrete risk changed.
+7. Report results with the fixed schema in `qa-checklist.md`. Report every
    deviation; do not silently reinterpret one as an exception.
 
 For repository delivery, Save performs Git protection only. Preview should
 reach a reviewable immutable deployment quickly with the repository's targeted
-checks. Publish runs the complete verification profile against that unchanged
-candidate before production moves. Do not describe a Preview as fully verified
-unless the repository intentionally used its full fallback profile.
+checks. Publish runs the complete verification profile once against that
+unchanged candidate before production moves. Do not describe a Preview as fully
+verified unless the repository intentionally used its full fallback profile.
