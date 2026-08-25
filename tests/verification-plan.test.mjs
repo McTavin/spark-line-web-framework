@@ -5,10 +5,9 @@ import { createVerificationPlan } from "../scripts/verification-plan.mjs";
 
 const stepIds = (plan) => plan.steps.map((step) => step.id);
 
-test("documentation and workflow changes do not install dependencies or run suites", () => {
+test("documentation changes do not install dependencies or run suites", () => {
   const plan = createVerificationPlan([
     "README.md",
-    ".github/workflows/verify.yml",
     "skills/spark-line-web-framework/SKILL.md"
   ]);
 
@@ -70,7 +69,10 @@ test("manual verification can force the complete profile even without a diff", (
 
 test("toolchain and unknown changes fail closed to one full changed-surface suite", () => {
   for (const file of [
+    ".github/workflows/verify.yml",
+    ".github/dependabot.yml",
     "package.json",
+    "package-lock.json",
     "scripts/verify-changed.mjs",
     "skills/spark-line-web-framework/scripts/audit_layout.mjs",
     "src/future/new-boundary.ts"

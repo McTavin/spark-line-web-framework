@@ -2,11 +2,11 @@ const documentationPatterns = [
   /^README\.md$/,
   /^LICENSE$/,
   /^\.gitignore$/,
-  /^\.github\//,
   /^skills\/.*\.(?:md|ya?ml)$/
 ];
 
 const fullRiskPatterns = [
+  /^\.github\//,
   /^package(?:-lock)?\.json$/,
   /^tsconfig\.build\.json$/,
   /^\.npmrc$/,
