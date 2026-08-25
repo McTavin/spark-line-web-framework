@@ -47,7 +47,8 @@
   },
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/build.mjs",
-    "check": "tsc -p tsconfig.build.json --noEmit && node scripts/validate-package.mjs",
+    "check": "tsc -p tsconfig.build.json --noEmit && npm run check:package",
+    "check:package": "node scripts/validate-package.mjs",
     "catalog:export": "node scripts/export-framework-catalog.mjs",
     "clean": "node scripts/clean.mjs",
     "test": "npm run build && npm run test:unit",
@@ -57,8 +58,9 @@
     "test:browser": "node scripts/test-browser.mjs",
     "pack:inspect": "node scripts/inspect-pack.mjs",
     "verify:changed": "node scripts/verify-changed.mjs",
-    "verify:full": "npm run build && npm run check && npm run test:unit && npm run catalog:export && npm run pack:artifact && npm run test:fixtures && npm run test:browser && npm run pack:inspect && node scripts/create-release-candidate.mjs",
-    "prepack": "npm run build && npm run check && npm test"
+    "verify:package": "npm run build && npm run check:package && npm run test:unit",
+    "verify:full": "npm run verify:package && npm run catalog:export && npm run pack:artifact && npm run test:fixtures && npm run test:browser && npm run pack:inspect && node scripts/create-release-candidate.mjs",
+    "prepack": "npm run verify:package"
   },
   "peerDependencies": {
     "astro": ">=5 <8",
