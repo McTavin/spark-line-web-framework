@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { createFrameworkCatalogManifest, serializeCatalogManifest } from "../dist/catalog/index.js";
+import { createFrameworkCatalogManifest, LUMOS_FOR_ASTRO_CATALOG_MANIFEST, serializeCatalogManifest } from "../dist/catalog/index.js";
 
 const outputIndex = process.argv.indexOf("--output");
 const output = resolve(outputIndex >= 0 ? process.argv[outputIndex + 1] : "dist/component-catalog.json");
@@ -16,3 +16,7 @@ for (const path of new Set([manifest.generated_from.path, ...manifest.components
 mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, serializeCatalogManifest(manifest));
 console.log(`Wrote ${manifest.components.length} catalog entries to ${output}`);
+
+const lumosOutput = resolve(dirname(output), "lumos-for-astro-catalog.json");
+writeFileSync(lumosOutput, serializeCatalogManifest(LUMOS_FOR_ASTRO_CATALOG_MANIFEST));
+console.log(`Wrote ${LUMOS_FOR_ASTRO_CATALOG_MANIFEST.components.length} Lumos catalog entries to ${lumosOutput}`);

@@ -3,6 +3,9 @@ import test from "node:test";
 
 import {
   CATALOG_SCHEMA_VERSION,
+  LUMOS_FOR_ASTRO_CATALOG_MANIFEST,
+  LUMOS_FOR_ASTRO_COMMIT,
+  LUMOS_FOR_ASTRO_REPOSITORY,
   WEB_FRAMEWORK_LAYOUT_PROFILE,
   WEB_FRAMEWORK_LAYOUT_PROFILE_ID,
   WEB_FRAMEWORK_SANITY_PROFILE,
@@ -88,6 +91,59 @@ test("framework catalog declares Astro and React parity for stable presentationa
   assert.ok(manifest.components.every((component) => component.composition.profile === WEB_FRAMEWORK_LAYOUT_PROFILE_ID));
 });
 
+test("Lumos for Astro is a separate exact-ref experimental system manifest", () => {
+  const manifest = LUMOS_FOR_ASTRO_CATALOG_MANIFEST;
+  const frameworkManifest = createFrameworkCatalogManifest({ commit });
+  const expectedPaths = [
+    "BaseHead",
+    "Button",
+    "ButtonWrapper",
+    "Card",
+    "ContentWrapper",
+    "Eyebrow",
+    "Footer",
+    "FormattedDate",
+    "Grid",
+    "Heading",
+    "Icon",
+    "Img",
+    "Nav",
+    "Overlay",
+    "Paragraph",
+    "RichText",
+    "Section",
+    "SkipLink",
+    "Video"
+  ].map((name) => `src/components/${name}.astro`).sort();
+
+  assert.equal(manifest.components.length, 19);
+  assert.equal(manifest.generated_from.repository, LUMOS_FOR_ASTRO_REPOSITORY);
+  assert.equal(manifest.generated_from.commit, LUMOS_FOR_ASTRO_COMMIT);
+  assert.notEqual(manifest.generated_from.repository, frameworkManifest.generated_from.repository);
+  assert.deepEqual(manifest.content_profiles, []);
+  assert.deepEqual(manifest.components.map((component) => component.source.path).sort(), expectedPaths);
+  assert.ok(manifest.components.every((component) => component.id.startsWith("lumos.")));
+  assert.ok(manifest.components.every((component) => component.scope === "system"));
+  assert.ok(manifest.components.every((component) => component.framework === "astro"));
+  assert.ok(manifest.components.every((component) => component.status === "experimental"));
+  assert.ok(manifest.components.every((component) => component.package === undefined));
+  assert.ok(manifest.components.every((component) => component.source.repository === LUMOS_FOR_ASTRO_REPOSITORY));
+  assert.ok(manifest.components.every((component) => component.source.commit === LUMOS_FOR_ASTRO_COMMIT));
+  assert.ok(manifest.components.every((component) => component.assets.some((asset) =>
+    asset.id === "lumos-mit-license" && asset.kind === "license" && asset.status === "available")));
+  assert.ok(manifest.components.every((component) => component.composition.profile === WEB_FRAMEWORK_LAYOUT_PROFILE_ID));
+
+  const byId = new Map(manifest.components.map((component) => [component.id, component]));
+  assert.deepEqual(byId.get("lumos.button").variants, ["primary", "secondary", "link"]);
+  assert.deepEqual(byId.get("lumos.content-wrapper").variants, [
+    "stack", "auto-width", "columns", "breakout", "contain", "sticky-content", "sticky-visual", "card"
+  ]);
+  assert.deepEqual(byId.get("lumos.grid").variants, ["columns", "autofit", "autofill"]);
+  assert.ok(byId.get("lumos.base-head").assets.some((asset) =>
+    asset.id === "lumos-default-social-image" && asset.status === "unavailable"));
+  assert.deepEqual(validateCatalogManifest(manifest), { valid: true, errors: [] });
+});
+
 test("catalog validation requires declared composition profiles and roles", () => {
   const missingProfile = {
     schema_version: 1,
@@ -160,6 +216,67 @@ test("catalog validation rejects duplicate content capabilities and models", () 
 
   assert.ok(result.errors.some((error) => error.includes("capabilities must not contain duplicates")));
   assert.ok(result.errors.some((error) => error.includes("models must not contain duplicates")));
+});
+
+test("catalog validation rejects loose legacy asset metadata", () => {
+  const result = validateCatalogManifest({
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [],
+    components: [{
+      ...component("legacy-assets"),
+      assets: [
+        { kind: "image", role: "hero", source: "sanity", required: true },
+        { id: "duplicate", kind: "asset", status: "available", note: "First" },
+        { id: "duplicate", kind: "asset", status: "available", note: " " }
+      ]
+    }]
+  });
+
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((error) => error.includes("assets[0].id")));
+  assert.ok(result.errors.some((error) => error.includes("assets[0].kind")));
+  assert.ok(result.errors.some((error) => error.includes("assets[0].status")));
+  assert.ok(result.errors.some((error) => error.includes("id duplicates duplicate")));
+  assert.ok(result.errors.some((error) => error.includes("note must be a non-empty string")));
+});
+
+test("catalog validation rejects loose legacy lineage metadata", () => {
+  const legacy = validateCatalogManifest({
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [],
+    components: [{
+      ...component("legacy-lineage"),
+      lineage: {
+        kind: "project-owned-preservation-extraction",
+        baseline: { repository: "repo", path: "archive.zip", commit }
+      }
+    }]
+  });
+  const malformed = validateCatalogManifest({
+    schema_version: 1,
+    generated_from: { repository: "repo", path: "catalog.json", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [],
+    components: [{
+      ...component("malformed-lineage"),
+      lineage: {
+        component_id: "Invalid ID",
+        source: { repository: "repo", path: "../component.astro", commit: "main" }
+      }
+    }]
+  });
+
+  assert.equal(legacy.valid, false);
+  assert.ok(legacy.errors.some((error) => error.includes("lineage.component_id")));
+  assert.ok(legacy.errors.some((error) => error.includes("lineage.source must be an exact Git source")));
+  assert.equal(malformed.valid, false);
+  assert.ok(malformed.errors.some((error) => error.includes("lineage.component_id")));
+  assert.ok(malformed.errors.some((error) => error.includes("lineage.source.path")));
+  assert.ok(malformed.errors.some((error) => error.includes("lineage.source.commit")));
 });
 
 test("serialization normalizes content capability and model order", () => {
