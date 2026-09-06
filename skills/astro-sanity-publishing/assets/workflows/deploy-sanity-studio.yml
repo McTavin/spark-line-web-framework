@@ -1,0 +1,133 @@
+# Adapt every __TOKEN__ using references/delivery.md before activation.
+name: Deploy Sanity Studio
+
+on:
+  push:
+    branches: ['__PRODUCTION_BRANCH__']
+    paths:
+      - '__STUDIO_DIR__/**'
+      - '__SHARED_STUDIO_INPUTS__'
+      - '__APP_LOCKFILE__'
+      - '__APP_DIR__/package.json'
+      - '.nvmrc'
+      - '.github/workflows/deploy-sanity-studio.yml'
+  pull_request:
+    paths:
+      - '__APP_DIR__/**'
+      - '__STUDIO_DIR__/**'
+      - '__SHARED_STUDIO_INPUTS__'
+      - '.github/workflows/deploy-sanity-studio.yml'
+      - '.github/workflows/deploy-editor-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sanity-studio-${{ github.event.pull_request.number || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  studio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      stale: ${{ steps.deploy.outputs.stale }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '__PRODUCTION_BRANCH__' }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '__NODE_VERSION__'
+          cache: npm
+          cache-dependency-path: |
+            __APP_LOCKFILE__
+            __STUDIO_LOCKFILE__
+      - run: npm ci
+        working-directory: '__APP_DIR__'
+      - name: Verify application
+        working-directory: '__APP_DIR__'
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.SANITY_DATASET }}
+          PUBLIC_SANITY_STUDIO_URL: ${{ vars.SANITY_STUDIO_URL }}
+        run: |
+          npm test
+          npm run build
+      - run: npm ci
+        working-directory: '__STUDIO_DIR__'
+      - name: Build and verify Studio
+        working-directory: '__STUDIO_DIR__'
+        env:
+          SANITY_STUDIO_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          SANITY_STUDIO_DATASET: ${{ vars.SANITY_DATASET }}
+          SANITY_STUDIO_PREVIEW_URL: ${{ vars.SANITY_PREVIEW_URL }}
+        run: |
+          test -z "$(git status --porcelain)" || { git status --short; exit 1; }
+          npm run build
+          test -z "$(git status --porcelain)" || { git status --short; exit 1; }
+          node scripts/verify-deployment.mjs '__STUDIO_DIST__/studio-version.json' "$(git rev-parse HEAD)"
+      - name: Check preview build for PRs
+        if: github.event_name == 'pull_request'
+        working-directory: '__APP_DIR__'
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.SANITY_DATASET }}
+          PUBLIC_SANITY_STUDIO_URL: ${{ vars.SANITY_STUDIO_URL }}
+        run: npm run build:editor-preview
+      - name: Deploy current Studio
+        id: deploy
+        if: github.event_name != 'pull_request'
+        working-directory: '__STUDIO_DIR__'
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          SANITY_STUDIO_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          SANITY_STUDIO_DATASET: ${{ vars.SANITY_DATASET }}
+          SANITY_STUDIO_PREVIEW_URL: ${{ vars.SANITY_PREVIEW_URL }}
+        run: |
+          test -n "$SANITY_AUTH_TOKEN"
+          git fetch --no-tags origin '__PRODUCTION_BRANCH__'
+          if [ "$(git rev-parse FETCH_HEAD)" != "$(git rev-parse HEAD)" ]; then
+            echo 'stale=true' >> "$GITHUB_OUTPUT"
+            echo '::notice::Production branch advanced; skip upload and dispatch current branch'
+            exit 0
+          fi
+          test -z "$(git status --porcelain)"
+          npm run deploy -- --no-build --yes
+      - name: Verify served Studio
+        if: github.event_name != 'pull_request' && steps.deploy.outputs.stale != 'true'
+        working-directory: '__STUDIO_DIR__'
+        env:
+          STUDIO_URL: ${{ vars.SANITY_STUDIO_URL }}
+        run: |
+          test -n "$STUDIO_URL"
+          checkout_sha=$(git rev-parse HEAD)
+          for attempt in {1..6}; do
+            if curl --fail --silent --show-error --max-time 20 \
+              "${STUDIO_URL%/}/studio-version.json?sha=${checkout_sha}&attempt=${attempt}" \
+              -o "$RUNNER_TEMP/studio-version.json" && \
+              node scripts/verify-deployment.mjs "$RUNNER_TEMP/studio-version.json" "$checkout_sha"; then
+              echo "Verified served Studio at $checkout_sha" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo '::error::Served Studio does not match the clean checkout marker'
+          exit 1
+
+  reconcile:
+    needs: studio
+    if: github.event_name != 'pull_request' && needs.studio.outputs.stale == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Queue current production branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh workflow run deploy-sanity-studio.yml --ref '__PRODUCTION_BRANCH__'
+          echo 'Dispatched current production branch; stale artifact not uploaded.' >> "$GITHUB_STEP_SUMMARY"

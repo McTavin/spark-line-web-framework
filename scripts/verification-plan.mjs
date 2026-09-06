@@ -12,7 +12,7 @@ const fullRiskPatterns = [
   /^\.npmrc$/,
   /^\.nvmrc$/,
   /^starter\//,
-  /^skills\/.*\/scripts\//,
+  /^skills\/.*\/(?:assets|scripts)\//,
   /^scripts\/(?:build|clean|create-pack|create-release-candidate|inspect-pack|test-packed-fixtures|validate-package|verify-changed|verification-plan)\.mjs$/
 ];
 
@@ -118,7 +118,8 @@ function npmStep(id, args) {
 }
 
 function isDocumentationPath(file) {
-  return documentationPatterns.some((pattern) => pattern.test(file));
+  return !isFullRiskPath(file)
+    && documentationPatterns.some((pattern) => pattern.test(file));
 }
 
 function isFullRiskPath(file) {

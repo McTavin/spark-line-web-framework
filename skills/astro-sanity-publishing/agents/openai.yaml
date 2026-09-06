@@ -1,0 +1,4 @@
+interface:
+  display_name: "Astro + Sanity Publishing"
+  short_description: "Sanity editing and automatic delivery on Cloudflare"
+  default_prompt: "Use $astro-sanity-publishing to connect or repair this Astro site's Sanity editing and automatic Cloudflare publishing."

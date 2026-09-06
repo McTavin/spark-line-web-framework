@@ -206,6 +206,32 @@ requests both `design_authoring` and `web_framework`; structural-only work may
 request `web_framework`. Version drift is advisory and must never edit
 dependencies automatically.
 
+## Astro + Sanity publishing skill
+
+The [astro-sanity-publishing skill](skills/astro-sanity-publishing/SKILL.md)
+covers content and editorial images, authenticated Presentation editing, native
+Publish, automatic Studio/Cloudflare delivery and draft-aware maintenance.
+It works with Astro projects on Cloudflare without requiring this package's UI
+components or v14.23. It preserves the recipient's schemas, languages and media
+ownership instead of installing a universal content model.
+
+The folder contains instructions, references and code/workflow templates to
+adapt. It is not an installer for live projects. Copy the entire
+`skills/astro-sanity-publishing` folder into your agent's skill directory, or ask
+Codex's skill installer to install that path from
+`McTavin/spark-line-web-framework` at an exact reviewed commit. Keep the references
+and assets with `SKILL.md`. Installing the skill does not deploy anything.
+
+Invoke it with:
+
+```text
+Use $astro-sanity-publishing to connect this Astro site's editable content and
+images to Sanity, with Presentation editing and automatic Cloudflare publishing.
+```
+
+This skill is available from GitHub. It does not change the current npm version;
+the existing package file rules will include it in a future approved release.
+
 ## Development and release
 
 ```sh
