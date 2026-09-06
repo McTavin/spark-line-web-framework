@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {execFileSync, spawnSync} from 'node:child_process';
-import {mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
+import {appendFileSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import test from 'node:test';
-import {verifyWorkerDeployment} from '../skills/astro-sanity-publishing/assets/helpers/verify-worker-deployment.mjs';
+import {verifyWorkerDeployment} from '../assets/helpers/verify-worker-deployment.mjs';
 
 // Exercise the actual workflow shell against local Git history. Only provider
 // uploads and dispatch are doubles; no remote credentials or live content.
@@ -12,7 +12,7 @@ const targets = [
   {file: 'deploy-sanity-studio.yml', job: 'studio', step: 'Deploy current Studio', relevant: 'studio/config.ts'},
   {file: 'deploy-editor-preview.yml', job: 'deploy', step: 'Deploy current preview', relevant: 'src/page.astro'},
 ];
-const workflow = target => readFileSync(new URL(`../skills/astro-sanity-publishing/assets/workflows/${target.file}`, import.meta.url), 'utf8');
+const workflow = target => readFileSync(new URL(`../assets/workflows/${target.file}`, import.meta.url), 'utf8');
 function shell(source, step) {
   const section = source.split(`      - name: ${step}\n`)[1];
   assert.ok(section, `Missing step ${step}`);
@@ -67,12 +67,99 @@ fi
 `, {mode: 0o755});
   const output = join(root, 'output'), uploads = join(root, 'uploads'), dispatches = join(root, 'dispatches');
   for (const path of [output, uploads, dispatches]) writeFileSync(path, '');
-  const env = {...process.env, PATH: `${bin}:${process.env.PATH}`, SANITY_AUTH_TOKEN: 'offline-fixture', CLOUDFLARE_ACCOUNT_ID: 'fixture', CLOUDFLARE_API_TOKEN: 'fixture', WORKER_NAME: 'fixture-preview',
+  const env = {PATH: `${bin}:${process.env.PATH}`, SANITY_AUTH_TOKEN: 'offline-fixture', CLOUDFLARE_ACCOUNT_ID: 'fixture', CLOUDFLARE_API_TOKEN: 'fixture', WORKER_NAME: 'fixture-preview', WORKER_CONFIG: 'dist/server/wrangler.json', WRANGLER_ENV: '',
     GITHUB_OUTPUT: output, GITHUB_STEP_SUMMARY: join(root, 'summary'), UPLOAD_LOG: uploads, DISPATCH_LOG: dispatches};
-  return {first, advance, read: path => readFileSync(path, 'utf8'), output, uploads, dispatches,
+  return {root, checkout, bin, first, advance, read: path => readFileSync(path, 'utf8'), output, uploads, dispatches,
     run: (script, extra = {}) => spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', script], {cwd: checkout, env: {...env, ...extra}, encoding: 'utf8'}),
     checkoutBranch() {git(checkout, 'fetch', 'origin', 'release'); git(checkout, 'checkout', '--detach', 'origin/release'); writeFileSync(output, '');},
   };
+}
+
+const previewSource = workflow(targets[1]).replaceAll('__PRODUCTION_BRANCH__', 'release');
+const previewDeploy = shell(previewSource, 'Deploy current preview');
+const previewInspect = shell(previewSource, 'Verify active Worker version');
+
+test('Worker target inputs are shared and credentials are confined to deployment and inspection', () => {
+  const jobEnv = previewSource.match(/^    env:\n((?:      .+\n)+)/m)?.[1];
+  assert.equal(jobEnv, "      WORKER_CONFIG: '__WORKER_CONFIG__'\n" +
+    '      WORKER_NAME: ${{ vars.EDITOR_WORKER_NAME }}\n' +
+    '      WRANGLER_ENV: ${{ vars.EDITOR_WORKER_ENV }}\n');
+  const stepEnv = name => previewSource.split(`      - name: ${name}\n`)[1]
+    .match(/        env:\n((?:          .+\n)+)/)?.[1];
+  const credentials = '          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}\n' +
+    '          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}\n';
+  assert.equal(stepEnv('Deploy current preview'), credentials);
+  assert.equal(stepEnv('Verify active Worker version'), credentials);
+  assert.equal([...previewSource.matchAll(/secrets\.CLOUDFLARE_API_TOKEN/g)].length, 2);
+  assert.equal([...previewSource.matchAll(/secrets\.CLOUDFLARE_ACCOUNT_ID/g)].length, 2);
+  assert.match(previewSource, /if: steps.deploy.outputs.stale != 'true'/);
+});
+
+function workerFixture(t) {
+  const f = fixture(t, targets[1]);
+  const config = 'dist/editor runtime/wrangler.json';
+  mkdirSync(join(f.checkout, 'dist/editor runtime'), {recursive: true});
+  writeFileSync(join(f.checkout, config), '{}');
+  mkdirSync(join(f.checkout, 'scripts'));
+  writeFileSync(join(f.checkout, 'scripts/verify-worker-deployment.mjs'),
+    readFileSync(new URL('../assets/helpers/verify-worker-deployment.mjs', import.meta.url)));
+  appendFileSync(join(f.checkout, '.git/info/exclude'), 'scripts/\n');
+  writeFileSync(join(f.bin, 'sleep'), '#!/bin/bash\nexit 0\n', {mode: 0o755});
+  // Record argv boundaries and effective account, then emulate provider evidence
+  // scoped to the exact deployed target. No Wrangler installation or API calls.
+  writeFileSync(join(f.bin, 'npx'), `#!${process.execPath}
+const fs = require('node:fs');
+const args = process.argv.slice(2);
+const value = flag => args.includes(flag) ? args[args.indexOf(flag) + 1] : null;
+const config = value('--config');
+const selected = config ? JSON.parse(fs.readFileSync(config, 'utf8')) : {};
+const environment = value('--env');
+const effective = environment ? {...selected, ...selected.env?.[environment]} : selected;
+const target = {config, name: value('--name'), environment,
+  account: effective.account_id || process.env.CLOUDFLARE_ACCOUNT_ID};
+fs.appendFileSync(process.env.CALL_LOG, JSON.stringify({args, target}) + '\\n');
+if (args[2] === 'deploy') {
+  fs.writeFileSync(process.env.DEPLOY_RECORD, JSON.stringify({target, message: value('--message')}));
+} else if (args[2] === 'deployments' && args[3] === 'list') {
+  const deployed = JSON.parse(fs.readFileSync(process.env.DEPLOY_RECORD, 'utf8'));
+  const matches = JSON.stringify(target) === JSON.stringify(deployed.target);
+  process.stdout.write(JSON.stringify([{id:'deployment',created_on:'2026-09-06T06:00:00.000Z',
+    annotations:{'workers/message': matches ? deployed.message : 'editor-preview@' + '0'.repeat(40)},
+    versions:[{version_id:'version',percentage:100}]}]));
+} else process.exit(1);
+`, {mode: 0o755});
+  const callLog = join(f.root, 'calls');
+  const env = {WORKER_CONFIG: config, RUNNER_TEMP: f.root,
+    CALL_LOG: callLog, DEPLOY_RECORD: join(f.root, 'deployed')};
+  return {...f, env, calls: () => f.read(callLog).trim().split('\n').map(JSON.parse)};
+}
+
+for (const environment of ['', 'editor']) {
+  test(`Worker deployment and inspection share config, name, account and ${environment || 'default'} environment`, t => {
+    const f = workerFixture(t);
+    const env = {...f.env, WRANGLER_ENV: environment};
+    assert.equal(f.run(previewDeploy, env).status, 0);
+    const result = f.run(previewInspect, env);
+    assert.equal(result.status, 0, result.stderr);
+    const [deploy, inspect] = f.calls();
+    assert.deepEqual(inspect.target, deploy.target);
+    assert.deepEqual(deploy.target, {config: env.WORKER_CONFIG, name: 'fixture-preview', environment, account: 'fixture'});
+    assert.ok(inspect.args.includes('--json'));
+    assert.match(f.read(join(f.root, 'summary')), new RegExp(f.first));
+  });
+}
+
+for (const [field, value] of Object.entries({WORKER_CONFIG: 'dist/server/wrangler.json',
+  WORKER_NAME: 'another-worker', CLOUDFLARE_ACCOUNT_ID: 'another-account', WRANGLER_ENV: 'another-env'})) {
+  test(`Worker inspection fails visibly when ${field} differs from the deployed target`, t => {
+    const f = workerFixture(t);
+    assert.equal(f.run(previewDeploy, f.env).status, 0);
+    const result = f.run(previewInspect, {...f.env, [field]: value});
+    assert.equal(result.status, 1);
+    assert.match(result.stdout, /::error::Active Worker deployment does not match checkout/);
+    assert.notDeepEqual(f.calls()[1].target, f.calls()[0].target);
+    assert.doesNotMatch(result.stdout, /Verified active/);
+  });
 }
 
 for (const target of targets) {

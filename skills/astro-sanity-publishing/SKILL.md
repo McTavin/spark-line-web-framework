@@ -69,6 +69,13 @@ Test concurrency and content races offline; do not manufacture a production
 failure, stale browser state or test publication. Reuse passing evidence when
 its inputs have not changed.
 
+Keep the bundled `tests/` directory with the skill. From the copied skill root,
+run `node --test tests/*.test.mjs` using Node 24, Git and Bash on a POSIX system;
+no npm install or provider credentials are needed. See the
+[delivery reference](references/delivery.md) for test limits and the distinction
+between repository-build identity, running Sanity core, editor state and public
+content freshness.
+
 Report separately: implemented code, saved/merged SHA, deployed Studio marker,
 active preview Worker version, and verified published-content delivery. A build
 or dispatch alone is not deployment proof. If credentials or configuration are

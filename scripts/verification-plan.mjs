@@ -23,6 +23,24 @@ const stylesPattern = /^styles\//;
 const catalogPattern = /^(?:src\/(?:catalog|registry)\/|scripts\/export-framework-catalog\.mjs$)/;
 const browserToolPattern = /^scripts\/test-browser\.mjs$/;
 const unitTestPattern = /^tests\/[^/]+\.test\.mjs$/;
+const skillRoot = "skills/astro-sanity-publishing/";
+const skillContentPatterns = [
+  /^SKILL\.md$/,
+  /^references\/[^/]+\.md$/,
+  /^agents\/openai\.yaml$/,
+  /^tests\/content\.test\.mjs$/
+];
+const skillSuites = new Map([
+  ["assets/helpers/maintenance-patches.mjs", "maintenance"],
+  ["assets/helpers/studio-version.mjs", "maintenance"],
+  ["assets/helpers/verify-deployment.mjs", "maintenance"],
+  ["tests/maintenance.test.mjs", "maintenance"],
+  ["assets/helpers/verify-worker-deployment.mjs", "deployment"],
+  ["assets/workflows/deploy-sanity-studio.yml", "deployment"],
+  ["assets/workflows/deploy-editor-preview.yml", "deployment"],
+  ["tests/deployment.test.mjs", "deployment"]
+]);
+const skillPackageTest = "tests/astro-sanity-skill-package.test.mjs";
 
 export function createVerificationPlan(inputPaths, { forceFull = false } = {}) {
   const paths = [...new Set(inputPaths.filter(Boolean))].sort();
@@ -35,13 +53,13 @@ export function createVerificationPlan(inputPaths, { forceFull = false } = {}) {
     return plan("none", paths, [], []);
   }
 
-  if (paths.every(isDocumentationPath)) {
-    return plan("documentation", paths, [], []);
-  }
-
   const unknownPaths = paths.filter((file) => !isKnownPath(file));
   if (unknownPaths.length > 0 || paths.some(isFullRiskPath)) {
     return plan("full", paths, fullSteps(), unknownPaths);
+  }
+
+  if (paths.every(isDocumentationPath)) {
+    return plan("documentation", paths, [], []);
   }
 
   const astro = paths.some((file) => astroPattern.test(file));
@@ -50,7 +68,8 @@ export function createVerificationPlan(inputPaths, { forceFull = false } = {}) {
   const styles = paths.some((file) => stylesPattern.test(file));
   const catalog = paths.some((file) => catalogPattern.test(file));
   const browserTool = paths.some((file) => browserToolPattern.test(file));
-  const unitTests = paths.some((file) => unitTestPattern.test(file));
+  const unitTests = paths.some((file) => unitTestPattern.test(file) && !skillSurface(file));
+  const skillChanges = new Set(paths.map(skillSurface).filter(Boolean));
   const browser = astro || react || styles || browserTool;
   const packageFixture = astro || react || sanity || styles || browserTool;
   const build = packageFixture || catalog || unitTests;
@@ -79,11 +98,24 @@ export function createVerificationPlan(inputPaths, { forceFull = false } = {}) {
     steps.push(npmStep("inspect-pack", ["run", "pack:inspect"]));
   }
 
+  // The repository unit runner already includes all portable suites and package
+  // assertions. Do not run the same test files twice for mixed changes.
+  if (skillChanges.size > 0 && !build) {
+    steps.push(skillTestStep("content"));
+    for (const suite of ["maintenance", "deployment"]) {
+      if (skillChanges.has(suite)) steps.push(skillTestStep(suite));
+    }
+    if ([...skillChanges].some((surface) => surface !== "content")) {
+      steps.push({ id: "skill-package", command: "node", args: ["--test", skillPackageTest] });
+    }
+  }
+
   const boundaries = [
     ...(catalog ? ["catalog"] : []),
     ...(sanity ? ["sanity"] : []),
     ...(browser ? ["browser"] : []),
-    ...(!catalog && !sanity && !browser && unitTests ? ["unit"] : [])
+    ...(!catalog && !sanity && !browser && unitTests ? ["unit"] : []),
+    ...(skillChanges.size > 0 ? ["skill"] : [])
   ];
 
   return plan(boundaries.join("+") || "targeted", paths, steps, []);
@@ -107,7 +139,7 @@ function plan(profile, paths, steps, unknownPaths) {
     profile,
     paths,
     unknownPaths,
-    needsDependencies: steps.length > 0,
+    needsDependencies: steps.some((entry) => entry.command === "npm"),
     needsBrowser: steps.some((entry) => entry.id === "browser"),
     steps
   };
@@ -117,17 +149,34 @@ function npmStep(id, args) {
   return { id, command: "npm", args };
 }
 
+function skillTestStep(suite) {
+  return {
+    id: `skill-${suite}`,
+    command: "node",
+    args: ["--test", `${skillRoot}tests/${suite}.test.mjs`]
+  };
+}
+
+function skillSurface(file) {
+  if (file === skillPackageTest) return "package";
+  if (!file.startsWith(skillRoot)) return undefined;
+  const relative = file.slice(skillRoot.length);
+  if (skillContentPatterns.some((pattern) => pattern.test(relative))) return "content";
+  return skillSuites.get(relative);
+}
+
 function isDocumentationPath(file) {
-  return !isFullRiskPath(file)
+  return !file.startsWith(skillRoot) && !isFullRiskPath(file)
     && documentationPatterns.some((pattern) => pattern.test(file));
 }
 
 function isFullRiskPath(file) {
-  return fullRiskPatterns.some((pattern) => pattern.test(file));
+  return !skillSurface(file) && fullRiskPatterns.some((pattern) => pattern.test(file));
 }
 
 function isKnownPath(file) {
-  return isDocumentationPath(file)
+  return Boolean(skillSurface(file))
+    || isDocumentationPath(file)
     || isFullRiskPath(file)
     || astroPattern.test(file)
     || reactPattern.test(file)

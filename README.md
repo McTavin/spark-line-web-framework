@@ -220,7 +220,10 @@ adapt. It is not an installer for live projects. Copy the entire
 `skills/astro-sanity-publishing` folder into your agent's skill directory, or ask
 Codex's skill installer to install that path from
 `McTavin/spark-line-web-framework` at an exact reviewed commit. Keep the references
-and assets with `SKILL.md`. Installing the skill does not deploy anything.
+and assets and portable tests with `SKILL.md`. Installing the skill does not
+deploy anything. From the copied skill root, run `node --test tests/*.test.mjs`
+with Node 24, Git and Bash on a POSIX system. No dependency installation or
+provider credentials are needed for these offline tests.
 
 Invoke it with:
 

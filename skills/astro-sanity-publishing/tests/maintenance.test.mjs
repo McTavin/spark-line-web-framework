@@ -5,8 +5,8 @@ import {mkdtempSync, mkdirSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {applyPairedPatch, planPairedPatch, readDocumentPair, resolveMaintenancePath} from '../skills/astro-sanity-publishing/assets/helpers/maintenance-patches.mjs';
-import {studioVersionPlugin, verifyStudioVersion} from '../skills/astro-sanity-publishing/assets/helpers/studio-version.mjs';
+import {applyPairedPatch, planPairedPatch, readDocumentPair, resolveMaintenancePath} from '../assets/helpers/maintenance-patches.mjs';
+import {studioVersionPlugin, verifyStudioVersion} from '../assets/helpers/studio-version.mjs';
 
 const published = (extra = {}) => ({_id: 'page-home', _type: 'page', _rev: 'p1', headings: [{_key: 'title', es: 'Antes', en: 'Before'}, {_key: 'other', es: 'Otro'}], ...extra});
 const draft = (extra = {}) => ({...published(), _id: 'drafts.page-home', _rev: 'd1', ...extra});
@@ -181,7 +181,7 @@ test('marker plugin reads configured repository independently of its asset locat
 
 test('deployment verification CLI exits nonzero for wrong SHA or missing arguments', () => {
   const root = mkdtempSync(join(tmpdir(), 'astro-sanity-verify-'));
-  const cli = fileURLToPath(new URL('../skills/astro-sanity-publishing/assets/helpers/verify-deployment.mjs', import.meta.url));
+  const cli = fileURLToPath(new URL('../assets/helpers/verify-deployment.mjs', import.meta.url));
   try {
     const sha = 'a'.repeat(40), markerFile = join(root, 'studio-version.json');
     writeFileSync(markerFile, JSON.stringify({gitSha: sha, dirty: false, builtAt: '2026-09-06T04:00:00.000Z'}));

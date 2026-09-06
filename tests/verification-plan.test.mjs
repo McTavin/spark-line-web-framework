@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { createVerificationPlan } from "../scripts/verification-plan.mjs";
@@ -8,10 +9,7 @@ const stepIds = (plan) => plan.steps.map((step) => step.id);
 test("documentation changes do not install dependencies or run suites", () => {
   const plan = createVerificationPlan([
     "README.md",
-    "skills/spark-line-web-framework/SKILL.md",
-    "skills/astro-sanity-publishing/SKILL.md",
-    "skills/astro-sanity-publishing/references/delivery.md",
-    "skills/astro-sanity-publishing/agents/openai.yaml"
+    "skills/spark-line-web-framework/SKILL.md"
   ]);
 
   assert.equal(plan.profile, "documentation");
@@ -20,11 +18,74 @@ test("documentation changes do not install dependencies or run suites", () => {
   assert.deepEqual(stepIds(plan), []);
 });
 
-test("skill executable assets cannot be mistaken for documentation by extension", () => {
+test("publishing skill instructions and metadata run only portable content validation", () => {
   for (const file of [
-    "skills/astro-sanity-publishing/assets/workflows/deploy-sanity-studio.yml",
-    "skills/astro-sanity-publishing/assets/workflows/deploy-editor-preview.yaml",
+    "SKILL.md",
+    "references/delivery.md",
+    "agents/openai.yaml",
+    "tests/content.test.mjs"
+  ]) {
+    const plan = createVerificationPlan(["README.md", `skills/astro-sanity-publishing/${file}`]);
+    assert.equal(plan.profile, "skill");
+    assert.equal(plan.needsDependencies, false);
+    assert.equal(plan.needsBrowser, false);
+    assert.deepEqual(stepIds(plan), ["skill-content"]);
+    assert.deepEqual(plan.steps[0].args, ["--test", "skills/astro-sanity-publishing/tests/content.test.mjs"]);
+  }
+});
+
+test("known maintenance helpers and tests select only their portable suite and package checks", () => {
+  for (const file of [
+    "assets/helpers/maintenance-patches.mjs",
+    "assets/helpers/studio-version.mjs",
+    "assets/helpers/verify-deployment.mjs",
+    "tests/maintenance.test.mjs"
+  ]) {
+    const plan = createVerificationPlan([`skills/astro-sanity-publishing/${file}`]);
+    assert.equal(plan.profile, "skill");
+    assert.equal(plan.needsDependencies, false);
+    assert.equal(plan.needsBrowser, false);
+    assert.deepEqual(stepIds(plan), ["skill-content", "skill-maintenance", "skill-package"]);
+    assert.ok(plan.steps.every((step) => step.command === "node"));
+  }
+});
+
+test("known executable workflows and Worker verification select deployment coverage, not documentation", () => {
+  for (const file of [
+    "assets/workflows/deploy-sanity-studio.yml",
+    "assets/workflows/deploy-editor-preview.yml",
+    "assets/helpers/verify-worker-deployment.mjs",
+    "tests/deployment.test.mjs"
+  ]) {
+    const plan = createVerificationPlan([`skills/astro-sanity-publishing/${file}`]);
+    assert.equal(plan.profile, "skill");
+    assert.equal(plan.needsDependencies, false);
+    assert.equal(plan.needsBrowser, false);
+    assert.deepEqual(stepIds(plan), ["skill-content", "skill-deployment", "skill-package"]);
+  }
+});
+
+test("portable suites and repository package assertions are unioned without duplicate steps", () => {
+  const plan = createVerificationPlan([
+    "skills/astro-sanity-publishing/SKILL.md",
     "skills/astro-sanity-publishing/assets/helpers/maintenance-patches.mjs",
+    "skills/astro-sanity-publishing/tests/maintenance.test.mjs",
+    "skills/astro-sanity-publishing/assets/workflows/deploy-editor-preview.yml",
+    "tests/astro-sanity-skill-package.test.mjs",
+    "tests/astro-sanity-skill-package.test.mjs"
+  ]);
+  assert.deepEqual(stepIds(plan), ["skill-content", "skill-maintenance", "skill-deployment", "skill-package"]);
+  assert.equal(plan.needsDependencies, false);
+  assert.deepEqual(plan.steps.at(-1).args, ["--test", "tests/astro-sanity-skill-package.test.mjs"]);
+
+  const packageOnly = createVerificationPlan(["tests/astro-sanity-skill-package.test.mjs"]);
+  assert.deepEqual(stepIds(packageOnly), ["skill-content", "skill-package"]);
+});
+
+test("unknown skill executable assets cannot be mistaken for documentation by extension", () => {
+  for (const file of [
+    "skills/astro-sanity-publishing/assets/workflows/deploy-editor-preview.yaml",
+    "skills/astro-sanity-publishing/assets/helpers/future-helper.mjs",
     "skills/astro-sanity-publishing/assets/README.md",
     "skills/spark-line-web-framework/scripts/settings.yaml",
     "skills/spark-line-web-framework/resources/scripts/settings.yaml"
@@ -36,6 +97,17 @@ test("skill executable assets cannot be mistaken for documentation by extension"
     assert.ok(stepIds(plan).includes("pack"), file);
     assert.ok(stepIds(plan).includes("inspect-pack"), file);
     assert.deepEqual(plan.unknownPaths, [], file);
+  }
+});
+
+test("unknown portable tests and configuration fail closed", () => {
+  for (const file of [
+    "skills/astro-sanity-publishing/tests/future.test.mjs",
+    "skills/astro-sanity-publishing/agents/execute.yaml"
+  ]) {
+    const plan = createVerificationPlan(["skills/astro-sanity-publishing/SKILL.md", file]);
+    assert.equal(plan.profile, "full");
+    assert.deepEqual(plan.unknownPaths, [file]);
   }
 });
 
@@ -80,6 +152,25 @@ test("react changes run the react fixture and browser checks without unrelated f
   assert.deepEqual(plan.steps.find((step) => step.id === "fixtures").args.slice(-1), ["react-island"]);
 });
 
+test("mixed skill and runtime changes retain boundary verification without repeating portable tests", () => {
+  for (const [runtimePath, profile, fixture, needsBrowser] of [
+    ["src/sanity/index.ts", "sanity+skill", "sanity", false],
+    ["src/react/Tabs.tsx", "browser+skill", "react-island", true]
+  ]) {
+    const plan = createVerificationPlan([
+      runtimePath,
+      "skills/astro-sanity-publishing/assets/helpers/maintenance-patches.mjs",
+      "skills/astro-sanity-publishing/assets/workflows/deploy-editor-preview.yml"
+    ]);
+    assert.equal(plan.profile, profile);
+    assert.equal(plan.needsDependencies, true);
+    assert.equal(plan.needsBrowser, needsBrowser);
+    assert.equal(stepIds(plan).filter((id) => id === "unit").length, 1);
+    assert.ok(!stepIds(plan).some((id) => id.startsWith("skill-")));
+    assert.deepEqual(plan.steps.find((step) => step.id === "fixtures").args.slice(-1), [fixture]);
+  }
+});
+
 
 test("manual verification can force the complete profile even without a diff", () => {
   const plan = createVerificationPlan([], { forceFull: true });
@@ -87,6 +178,7 @@ test("manual verification can force the complete profile even without a diff", (
   assert.equal(plan.profile, "full");
   assert.equal(plan.needsDependencies, true);
   assert.equal(plan.needsBrowser, true);
+  assert.equal(createVerificationPlan(["skills/astro-sanity-publishing/SKILL.md"], { forceFull: true }).profile, "full");
 });
 
 test("toolchain and unknown changes fail closed to one full changed-surface suite", () => {
@@ -99,7 +191,7 @@ test("toolchain and unknown changes fail closed to one full changed-surface suit
     "skills/spark-line-web-framework/scripts/audit_layout.mjs",
     "src/future/new-boundary.ts"
   ]) {
-    const plan = createVerificationPlan([file]);
+    const plan = createVerificationPlan([file, "skills/astro-sanity-publishing/SKILL.md"]);
     assert.equal(plan.profile, "full");
     assert.equal(plan.needsBrowser, true);
     assert.deepEqual(stepIds(plan), [
@@ -113,4 +205,15 @@ test("toolchain and unknown changes fail closed to one full changed-surface suit
       "inspect-pack"
     ]);
   }
+});
+
+test("CI pins Node before planning while dependencies and browser setup remain conditional", () => {
+  const workflow = readFileSync(new URL("../.github/workflows/verify.yml", import.meta.url), "utf8");
+  const setup = workflow.indexOf("- uses: actions/setup-node@v4");
+  const plan = workflow.indexOf("- name: Plan verification");
+  assert.ok(setup >= 0 && setup < plan);
+  assert.match(workflow.slice(setup, plan), /node-version: 24/);
+  assert.doesNotMatch(workflow.slice(setup, plan), /if:/);
+  assert.match(workflow, /- run: npm ci\n\s+if: steps\.plan\.outputs\.needs_dependencies == 'true'/);
+  assert.match(workflow, /- name: Prefer installed Chrome\n\s+if: steps\.plan\.outputs\.needs_browser == 'true'/);
 });

@@ -23,6 +23,21 @@ A Workers SSR site may already read published content on request without a
 rebuild hook. Preserve that model and its cache invalidation instead of imposing
 a static-site trigger. Confirm Publish becomes visible on the live route.
 
+## Identify which layer is current
+
+| Layer | Relevant evidence |
+| --- | --- |
+| Repository-owned Studio build | Served `studio-version.json` matches the expected checkout SHA, `dirty: false`, and a valid build time. |
+| Running Sanity core | Version loaded by the actual Studio browser session; the repository lockfile or build marker does not establish this when auto-updates are enabled. |
+| Open-editor document state | Visible fields and native synchronization status compared with exact, uncached document reads. Preserve unsaved or conflicting work; do not force a reload to manufacture a synchronized state. |
+| Public-site content | The actual rendered route and language match the intended published fields. A successful hook, build, or deployment alone does not establish this. |
+
+A matching marker proves repository-build identity, not browser synchronization
+or end-to-end content delivery. Auto-updates update Sanity core; they do not
+deploy repository-owned schemas, configuration, or plugins. Verify the layer
+relevant to the reported problem and name what remains unobserved. Do not add
+monitoring, custom synchronization, or mandatory publication experiments.
+
 ## Adapt the workflow assets
 
 Start with [Studio](../assets/workflows/deploy-sanity-studio.yml) and
@@ -51,7 +66,8 @@ Review transitive imports and build configuration, not only schema directories.
 Keep the target filenames or change the recovery dispatch filename with them.
 
 The templates use these repository variables: `SANITY_PROJECT_ID`,
-`SANITY_DATASET`, `SANITY_STUDIO_URL`, `SANITY_PREVIEW_URL`, `EDITOR_WORKER_NAME`.
+`SANITY_DATASET`, `SANITY_STUDIO_URL`, `SANITY_PREVIEW_URL`, `EDITOR_WORKER_NAME`,
+and optional `EDITOR_WORKER_ENV`.
 Map names to existing conventions instead of creating duplicate configuration.
 Secrets are `SANITY_AUTH_TOKEN` (Studio deploy only),
 `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN`. Preview read/session secrets
@@ -67,9 +83,22 @@ the Git root, especially in a monorepo; the default is the command's current
 directory. Continue using the recipient's deployment app configuration.
 
 Copy [verify-worker-deployment.mjs](../assets/helpers/verify-worker-deployment.mjs)
-to the app's `scripts/` directory. Ensure the locked Wrangler supports the
-commands in the template. Preserve runtime secrets/bindings. `--keep-vars`
+to the app's `scripts/` directory. The template's `deploy` and `deployments list`
+commands were checked against Wrangler `4.110.0`. Check `--version` and both
+commands' `--help` in the recipient's locked Wrangler before adopting them;
+adapt unsupported syntax instead of upgrading the recipient to match an example.
+Preserve runtime secrets/bindings. `--keep-vars`
 retains dashboard variables; it is not proof that every required binding exists.
+
+Deployment and inspection must use the same explicit `--config`, `--name`,
+`--env`, account and credentials. The template shares `WORKER_CONFIG`,
+`WORKER_NAME`, and `WRANGLER_ENV` at job scope, but supplies credentials only to
+those two steps. `EDITOR_WORKER_ENV` selects a named environment; an empty value
+passes `--env ""` for the top-level config. Resolve the built config path relative
+to the app package, including any spaces, and do not let inspection discover a
+different default config. In Wrangler `4.110.0`, configured `account_id` takes
+precedence over `CLOUDFLARE_ACCOUNT_ID`; ensure the selected environment's config
+agrees with the intended account. There is no account-override CLI flag here.
 
 ## Stale-run recovery and provenance
 
@@ -112,7 +141,18 @@ parallel toy algorithm. Check live delivery after normal authorized rollout,
 but do not force a production race or publish test content. Report separately
 if a real native Publish → live content update remains unobserved.
 
+The [deployment tests](../tests/deployment.test.mjs) exercise both templates and
+their target selection offline. Run all portable tests with
+`node --test tests/*.test.mjs` from the copied skill root. Use Node 24, Git and
+Bash on a POSIX system; no npm install, Wrangler, Sanity SDK, credentials or
+provider access is needed. The tests create temporary local Git repositories
+and replace provider commands with local doubles. They do not prove that a
+recipient's credentials, bindings, CLI version, or live deployment works.
+
 Sources: [Studio deployment](https://www.sanity.io/docs/studio/deployment),
+[Studio core auto-updates](https://www.sanity.io/docs/studio/latest-version-of-sanity),
 [Sanity webhooks](https://www.sanity.io/docs/content-lake/webhooks),
 [GitHub workflow dispatch](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow),
-[Wrangler commands](https://developers.cloudflare.com/workers/wrangler/commands/).
+[Wrangler commands](https://developers.cloudflare.com/workers/wrangler/commands/),
+[Wrangler 4.110.0 inspection](https://github.com/cloudflare/workers-sdk/blob/wrangler@4.110.0/packages/wrangler/src/versions/deployments/list.ts)
+and [account selection](https://github.com/cloudflare/workers-sdk/blob/wrangler@4.110.0/packages/wrangler/src/user/user.ts).
