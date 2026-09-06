@@ -34,6 +34,70 @@ test("publishing skill instructions and metadata run only portable content valid
   }
 });
 
+test("product design instructions, metadata and test select only their content and package check", () => {
+  for (const file of [
+    "skills/spark-line-product-design/SKILL.md",
+    "skills/spark-line-product-design/references/framework-decisions.md",
+    "skills/spark-line-product-design/agents/openai.yaml",
+    "tests/spark-line-product-design.test.mjs"
+  ]) {
+    const plan = createVerificationPlan(["README.md", file]);
+    assert.equal(plan.profile, "skill");
+    assert.equal(plan.needsDependencies, false);
+    assert.equal(plan.needsBrowser, false);
+    assert.deepEqual(plan.steps, [{
+      id: "design-skill", command: "node", args: ["--test", "tests/spark-line-product-design.test.mjs"]
+    }]);
+  }
+});
+
+test("product design and publishing skill checks combine without dropping or repeating suites", () => {
+  const plan = createVerificationPlan([
+    "skills/spark-line-product-design/SKILL.md",
+    "tests/spark-line-product-design.test.mjs",
+    "skills/astro-sanity-publishing/assets/helpers/maintenance-patches.mjs",
+    "skills/astro-sanity-publishing/assets/workflows/deploy-editor-preview.yml"
+  ]);
+  assert.equal(plan.profile, "skill");
+  assert.equal(plan.needsDependencies, false);
+  assert.equal(plan.needsBrowser, false);
+  assert.deepEqual(stepIds(plan), ["skill-content", "skill-maintenance", "skill-deployment", "skill-package", "design-skill"]);
+});
+
+test("mixed product design and runtime changes keep runtime boundaries and use the existing unit runner once", () => {
+  for (const [file, profile, fixture, browser] of [
+    ["src/sanity/index.ts", "sanity+skill", "sanity", false],
+    ["src/react/Tabs.tsx", "browser+skill", "react-island", true]
+  ]) {
+    const plan = createVerificationPlan(["skills/spark-line-product-design/SKILL.md", file]);
+    assert.equal(plan.profile, profile);
+    assert.equal(plan.needsDependencies, true);
+    assert.equal(plan.needsBrowser, browser);
+    assert.equal(stepIds(plan).filter((id) => id === "unit").length, 1);
+    assert.ok(!stepIds(plan).includes("design-skill"));
+    assert.deepEqual(plan.steps.find((step) => step.id === "fixtures").args.slice(-1), [fixture]);
+  }
+});
+
+test("product design changes never downgrade full-risk inputs or unknown executable paths", () => {
+  for (const file of [
+    "package-lock.json",
+    "scripts/verification-plan.mjs",
+    "skills/spark-line-product-design/assets/workflows/future.yml",
+    "skills/spark-line-product-design/scripts/future.mjs",
+    "skills/spark-line-product-design/agents/execute.yaml",
+    "skills/spark-line-product-design/tests/future.test.mjs"
+  ]) {
+    const plan = createVerificationPlan(["skills/spark-line-product-design/SKILL.md", file]);
+    assert.equal(plan.profile, "full", file);
+    assert.equal(plan.needsDependencies, true, file);
+    assert.equal(plan.needsBrowser, true, file);
+    assert.ok(stepIds(plan).includes("unit"), file);
+    assert.ok(stepIds(plan).includes("inspect-pack"), file);
+  }
+  assert.equal(createVerificationPlan(["skills/spark-line-product-design/SKILL.md"], { forceFull: true }).profile, "full");
+});
+
 test("known maintenance helpers and tests select only their portable suite and package checks", () => {
   for (const file of [
     "assets/helpers/maintenance-patches.mjs",

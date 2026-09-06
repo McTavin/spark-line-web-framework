@@ -41,6 +41,13 @@ const skillSuites = new Map([
   ["tests/deployment.test.mjs", "deployment"]
 ]);
 const skillPackageTest = "tests/astro-sanity-skill-package.test.mjs";
+const designSkillRoot = "skills/spark-line-product-design/";
+const designSkillTest = "tests/spark-line-product-design.test.mjs";
+
+function isDesignSkillPath(file) {
+  return file === designSkillTest || (file.startsWith(designSkillRoot)
+    && /^(?:SKILL\.md|references\/[^/]+\.md|agents\/openai\.yaml)$/.test(file.slice(designSkillRoot.length)));
+}
 
 export function createVerificationPlan(inputPaths, { forceFull = false } = {}) {
   const paths = [...new Set(inputPaths.filter(Boolean))].sort();
@@ -68,8 +75,9 @@ export function createVerificationPlan(inputPaths, { forceFull = false } = {}) {
   const styles = paths.some((file) => stylesPattern.test(file));
   const catalog = paths.some((file) => catalogPattern.test(file));
   const browserTool = paths.some((file) => browserToolPattern.test(file));
-  const unitTests = paths.some((file) => unitTestPattern.test(file) && !skillSurface(file));
+  const unitTests = paths.some((file) => unitTestPattern.test(file) && !skillSurface(file) && !isDesignSkillPath(file));
   const skillChanges = new Set(paths.map(skillSurface).filter(Boolean));
+  const designSkillChanges = paths.some(isDesignSkillPath);
   const browser = astro || react || styles || browserTool;
   const packageFixture = astro || react || sanity || styles || browserTool;
   const build = packageFixture || catalog || unitTests;
@@ -109,13 +117,16 @@ export function createVerificationPlan(inputPaths, { forceFull = false } = {}) {
       steps.push({ id: "skill-package", command: "node", args: ["--test", skillPackageTest] });
     }
   }
+  if (designSkillChanges && !build) {
+    steps.push({ id: "design-skill", command: "node", args: ["--test", designSkillTest] });
+  }
 
   const boundaries = [
     ...(catalog ? ["catalog"] : []),
     ...(sanity ? ["sanity"] : []),
     ...(browser ? ["browser"] : []),
     ...(!catalog && !sanity && !browser && unitTests ? ["unit"] : []),
-    ...(skillChanges.size > 0 ? ["skill"] : [])
+    ...(skillChanges.size > 0 || designSkillChanges ? ["skill"] : [])
   ];
 
   return plan(boundaries.join("+") || "targeted", paths, steps, []);
@@ -166,7 +177,7 @@ function skillSurface(file) {
 }
 
 function isDocumentationPath(file) {
-  return !file.startsWith(skillRoot) && !isFullRiskPath(file)
+  return !file.startsWith(skillRoot) && !file.startsWith(designSkillRoot) && !isFullRiskPath(file)
     && documentationPatterns.some((pattern) => pattern.test(file));
 }
 
@@ -176,6 +187,7 @@ function isFullRiskPath(file) {
 
 function isKnownPath(file) {
   return Boolean(skillSurface(file))
+    || isDesignSkillPath(file)
     || isDocumentationPath(file)
     || isFullRiskPath(file)
     || astroPattern.test(file)

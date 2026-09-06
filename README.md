@@ -206,6 +206,33 @@ requests both `design_authoring` and `web_framework`; structural-only work may
 request `web_framework`. Version drift is advisory and must never edit
 dependencies automatically.
 
+## Product design skill
+
+The [spark-line-product-design skill](skills/spark-line-product-design/SKILL.md)
+adds product judgment to this framework: choosing the right surface for a task,
+working within real component APIs, handling relevant states, and checking
+interface copy. It complements `spark-line-web-framework`, which owns structural
+implementation and QA. Project identity and approved design decisions stay with
+the recipient; this skill supplies no theme or universal content model.
+
+Copy `skills/spark-line-product-design` with its references and discovery
+metadata, or ask the skill installer for that path from this repository at an
+exact reviewed commit. Use the available framework companion or the recipient's
+version-matched repository/package contracts; installing this skill does not
+install or upgrade the npm package. No other skill is silently installed.
+
+```text
+Use $spark-line-product-design to review this project-filter flow against our
+framework components and user goals. Report findings without editing yet.
+```
+
+For implementation, ask it to make the scoped change. Review requests remain
+read-only. The skill uses existing layout and verification tools; it does not
+add a release gate. Repository content and package checks run with
+`node --test tests/spark-line-product-design.test.mjs` (Node 24 and npm, offline).
+The source and interpretation are documented in the skill; no client trials or
+new runtime APIs are included.
+
 ## Astro + Sanity publishing skill
 
 The [astro-sanity-publishing skill](skills/astro-sanity-publishing/SKILL.md)

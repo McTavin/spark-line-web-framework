@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spark Line Product Design"
+  short_description: "Product judgment for Spark Line interfaces"
+  default_prompt: "Use $spark-line-product-design to review this flow against the project's goals and framework contracts, without editing yet."
