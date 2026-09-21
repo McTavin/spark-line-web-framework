@@ -1,0 +1,14 @@
+{
+  "name": "la-puerta-de-tres-marias-concept",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@spark-line/web-framework": "0.2.1",
+    "astro": "^7.0.3"
+  }
+}

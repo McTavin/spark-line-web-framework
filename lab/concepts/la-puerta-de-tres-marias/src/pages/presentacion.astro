@@ -1,0 +1,148 @@
+---
+import "../styles/project.css";
+---
+
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="Presentación de una propuesta independiente de sitio web para La Puerta de Tres Marías, sucursal Cuernavaca." />
+    <title>Presentación de la propuesta · La Puerta de Tres Marías</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Instrument+Sans:wght@400..600&display=swap" />
+  </head>
+  <body class="pres">
+    <main class="pres__wrap">
+      <p class="pres__kicker">Propuesta independiente · sin afiliación ni aprobación del establecimiento</p>
+      <h1 class="pres__title">La Puerta de Tres Marías<br /><span>Sucursal Cuernavaca</span></h1>
+
+      <div class="pres__cols">
+        <section class="pres__card" aria-labelledby="pres-estado">
+          <h2 id="pres-estado">Estado actual</h2>
+          <div class="pres__tile" role="img" aria-label="Estado actual: no se encontró sitio web oficial durante la investigación">
+            <span class="pres__tile__mark">∅</span>
+            <span class="pres__tile__text">No se encontró sitio web oficial<br />durante la investigación (2026-09-20)</span>
+          </div>
+          <ul>
+            <li>Presencia pública: redes sociales del grupo y fichas en agregadores.</li>
+            <li>Calificación en Google: 4.3 con ≈1,100 reseñas, según espejos de terceros leídos el 2026-09-20.</li>
+            <li>Datos y conflictos completos: en las notas de investigación del proyecto.</li>
+          </ul>
+        </section>
+
+        <section class="pres__card pres__card--cta" aria-labelledby="pres-propuesta">
+          <h2 id="pres-propuesta">La propuesta</h2>
+          <p>
+            Un sitio de una sola página que convierte la ausencia de carta en
+            línea en la forma de conocer el lugar: explorar por lo que recuerdan
+            quienes ya vinieron, con cada opinión atribuida a su fuente.
+          </p>
+          <a class="pres__btn" href="/">Ver la propuesta de sitio →</a>
+          <p class="pres__fine">
+            La propuesta abre directa, sin esta presentación. Es un concepto de
+            diseño con datos públicos verificables, no un sitio del restaurante.
+          </p>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .pres {
+    margin: 0;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: clamp(1.5rem, 5vw, 4rem);
+    background:
+      radial-gradient(80% 60% at 20% 0%, rgba(180, 85, 45, 0.25), transparent 60%),
+      #241511;
+    color: #f6ead9;
+    font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: clamp(1.05rem, 0.4vw + 1rem, 1.2rem);
+    line-height: 1.6;
+  }
+
+  .pres__wrap { max-inline-size: 60rem; }
+
+  .pres__kicker {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #e08b5a;
+  }
+
+  .pres__title {
+    margin: 0 0 clamp(1.5rem, 4vw, 2.5rem);
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    line-height: 1.05;
+  }
+
+  .pres__title span {
+    font-size: 0.45em;
+    font-style: italic;
+    color: #cfa079;
+  }
+
+  .pres__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: clamp(1rem, 3vw, 2rem);
+  }
+
+  .pres__card {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: rgba(246, 234, 217, 0.05);
+    border: 1px solid rgba(246, 234, 217, 0.14);
+    border-radius: 0.875rem;
+  }
+
+  .pres__card h2 {
+    margin: 0 0 1rem;
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .pres__card ul { margin: 1rem 0 0; padding-inline-start: 1.25rem; }
+  .pres__card li { margin-block-end: 0.5rem; }
+
+  .pres__tile {
+    display: grid;
+    place-items: center;
+    gap: 0.5rem;
+    padding: 2rem 1rem;
+    background:
+      repeating-linear-gradient(45deg, rgba(246, 234, 217, 0.05) 0 10px, transparent 10px 20px);
+    border: 1px dashed rgba(246, 234, 217, 0.35);
+    border-radius: 0.5rem;
+    text-align: center;
+  }
+
+  .pres__tile__mark { font-size: 2.25rem; color: #cfa079; line-height: 1; }
+  .pres__tile__text { font-size: 1rem; color: rgba(246, 234, 217, 0.85); }
+
+  .pres__card--cta { display: grid; align-content: start; gap: 1rem; }
+  .pres__card--cta p { margin: 0; }
+
+  .pres__btn {
+    justify-self: start;
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #b4552d;
+    color: #fff7ec;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 999rem;
+  }
+
+  .pres__btn:hover, .pres__btn:focus-visible { background: #c9663c; }
+
+  .pres__fine { font-size: 1rem; color: rgba(246, 234, 217, 0.65); }
+</style>

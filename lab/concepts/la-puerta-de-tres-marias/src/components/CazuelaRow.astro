@@ -1,0 +1,284 @@
+---
+import { Heading, Text, Stack } from "@spark-line/web-framework/astro";
+
+const memories = [
+  {
+    id: "mole",
+    label: "Mole",
+    quote: "Las enchiladas de moles muy sabrosas.",
+    attribution: "Opinión de una comensal, publicada en Restaurant Guru, leída el 20 de septiembre de 2026.",
+    pot: "#a8492a",
+  },
+  {
+    id: "chilaquiles",
+    label: "Chilaquiles",
+    quote: "El café es muy rico, prueben el de olla. Los chilaquiles…",
+    attribution: "Opinión de un comensal, publicada en pos.do (reseña de Google replicada), leída el 20 de septiembre de 2026.",
+    pot: "#b4552d",
+  },
+  {
+    id: "taquitos",
+    label: "Taquitos de la casa",
+    quote: "Excelente sazón, unos taquitos de la casa de sabor formidable.",
+    attribution: "Opinión de un comensal, publicada en pos.do (reseña de Google replicada), leída el 20 de septiembre de 2026.",
+    pot: "#8a3d1f",
+  },
+  {
+    id: "cafe",
+    label: "Café de olla",
+    quote: "El café es muy rico, prueben el de olla.",
+    attribution: "Opinión de un comensal, publicada en pos.do (reseña de Google replicada), leída el 20 de septiembre de 2026.",
+    pot: "#9c4a24",
+  },
+  {
+    id: "medula",
+    label: "Sopa de médula",
+    quote: "Everything delicious. I ate bone marrow soup.",
+    attribution: "Opinión de una comensal, en inglés, publicada en Restaurant Guru, leída el 20 de septiembre de 2026.",
+    pot: "#c26a3d",
+  },
+];
+---
+
+<div class="recuerdos-head">
+  <Heading level={2} size="h2">Lo que se <span class="recuerdos-accent">recuerda</span></Heading>
+  <Text tone="muted" class="recuerdos-note">
+    Esta sucursal no publica carta en línea (no se encontró durante la
+    investigación del 20 de septiembre de 2026). Toca una cazuela para ver qué
+    platillo recuerda cada comensal. Son opiniones individuales, no el menú del
+    restaurante, y no incluyen precios porque no encontramos ninguno verificado.
+  </Text>
+</div>
+
+<div class="cazuelas" data-cazuelas>
+  <div class="cazuelas__rail" role="tablist" aria-label="Cazuelas de la memoria" tabindex="-1">
+    {memories.map((m, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`tab-${m.id}`}
+        aria-selected={i === 0 ? "true" : "false"}
+        aria-controls={`panel-${m.id}`}
+        tabindex={i === 0 ? "0" : "-1"}
+        class:list={["cazuela", { "is-selected": i === 0 }]}
+        style={`--pot-body: ${m.pot}`}
+        data-index={i}
+      >
+        <svg class="cazuela__svg" viewBox="0 0 120 78" focusable="false" aria-hidden="true">
+          <use href="#cazuela" />
+        </svg>
+        <span class="cazuela__label">{m.label}</span>
+      </button>
+    ))}
+  </div>
+
+  {memories.map((m, i) => (
+    <div
+      role="tabpanel"
+      id={`panel-${m.id}`}
+      aria-labelledby={`tab-${m.id}`}
+      hidden={i === 0 ? undefined : true}
+      class="cazuelas__panel"
+      data-index={i}
+    >
+      <Stack gap="sm">
+        <blockquote class="cazuelas__quote">“{m.quote}”</blockquote>
+        <p class="cazuelas__attribution">{m.attribution}</p>
+      </Stack>
+    </div>
+  ))}
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-cazuelas]");
+  if (root) {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[role="tabpanel"]'));
+    const rail = root.querySelector<HTMLElement>(".cazuelas__rail");
+    let lastDirection = 1;
+
+    const select = (index: number, focus = false) => {
+      const current = tabs.findIndex((t) => t.getAttribute("aria-selected") === "true");
+      if (index === current) return;
+      const direction = index > current ? 1 : -1;
+      lastDirection = direction;
+      tabs.forEach((tab, i) => {
+        const selected = i === index;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        tab.classList.toggle("is-selected", selected);
+      });
+      panels.forEach((panel, i) => {
+        if (i === index) {
+          panel.hidden = false;
+          panel.classList.remove("is-swapping");
+          void panel.offsetWidth;
+          panel.dataset.dir = String(direction);
+          panel.classList.add("is-swapping");
+        } else {
+          panel.hidden = true;
+        }
+      });
+      if (focus) tabs[index]?.focus();
+      tabs[index]?.scrollIntoView({ block: "nearest", inline: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    };
+
+    rail?.addEventListener("pointerdown", (e) => {
+      const target = (e.target as HTMLElement).closest<HTMLElement>('[role="tab"]');
+      if (!target) return;
+      e.preventDefault();
+      const index = tabs.indexOf(target as HTMLButtonElement);
+      select(index);
+      tabs[index]?.focus({ preventScroll: true });
+    });
+
+    rail?.addEventListener("keydown", (e) => {
+      const current = tabs.findIndex((t) => t === document.activeElement);
+      if (current === -1) return;
+      const key = (e as KeyboardEvent).key;
+      let next: number | null = null;
+      if (key === "ArrowRight") next = (current + 1) % tabs.length;
+      else if (key === "ArrowLeft") next = (current - 1 + tabs.length) % tabs.length;
+      else if (key === "Home") next = 0;
+      else if (key === "End") next = tabs.length - 1;
+      else if (key === "Enter" || key === " ") {
+        e.preventDefault();
+        select(current, true);
+        return;
+      } else if (key === "Escape") {
+        tabs[current]?.focus();
+        return;
+      }
+      if (next !== null) {
+        e.preventDefault();
+        select(next, true);
+      }
+    });
+  }
+</script>
+
+<style>
+  .recuerdos-head {
+    display: grid;
+    gap: 1rem;
+    justify-items: center;
+    text-align: center;
+    margin-block-end: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .recuerdos-head :global(h2) {
+    margin: 0;
+    color: var(--project-text-inverse);
+  }
+
+  .recuerdos-accent { color: #e08b5a; }
+
+  .recuerdos-note {
+    max-inline-size: 62ch;
+    color: rgba(246, 234, 217, 0.78);
+  }
+
+  .cazuelas__rail {
+    display: flex;
+    gap: clamp(0.5rem, 2vw, 1.75rem);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-block: 1.25rem 0.5rem;
+    padding-inline: 0.5rem;
+    scrollbar-width: thin;
+  }
+
+  .cazuela {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    inline-size: clamp(120px, 22vw, 190px);
+    min-block-size: 44px;
+    padding: 0.75rem 0.5rem 0.5rem;
+    background: transparent;
+    border: 0;
+    border-radius: var(--project-radius-md);
+    color: var(--project-text-inverse);
+    font-family: var(--project-font-body);
+    font-size: 1rem;
+    cursor: pointer;
+    transform-origin: 50% 100%;
+    transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), opacity 220ms cubic-bezier(0.2, 0, 0, 1);
+    opacity: 0.62;
+  }
+
+  .cazuela:hover { opacity: 0.85; }
+
+  .cazuela.is-selected {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.08);
+  }
+
+  .cazuela:focus-visible {
+    outline: var(--slf-focus-width) solid #e08b5a;
+    outline-offset: var(--slf-focus-offset);
+  }
+
+  .cazuela__svg {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.35));
+  }
+
+  .cazuela__label {
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    text-wrap: balance;
+  }
+
+  .cazuela.is-selected .cazuela__label { color: #e08b5a; }
+
+  .cazuelas__panel {
+    margin-block-start: 1.25rem;
+    padding: clamp(1.25rem, 4vw, 2.25rem);
+    background: rgba(246, 234, 217, 0.06);
+    border: 1px solid rgba(246, 234, 217, 0.16);
+    border-radius: var(--project-radius-md);
+    min-block-size: 9.5rem;
+  }
+
+  .cazuelas__panel.is-swapping {
+    animation: panel-in 260ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateX(calc(var(--dir, 1) * 12px)); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .cazuelas__panel[data-dir="-1"] { --dir: -1; }
+  .cazuelas__panel[data-dir="1"] { --dir: 1; }
+
+  .cazuelas__quote {
+    margin: 0;
+    font-family: var(--project-font-display);
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    line-height: 1.25;
+    color: var(--project-text-inverse);
+  }
+
+  .cazuelas__attribution {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(246, 234, 217, 0.72);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cazuela,
+    .cazuela.is-selected {
+      transition: none;
+      transform: none;
+      outline-offset: 0;
+    }
+    .cazuela.is-selected { border: 1px solid #e08b5a; }
+    .cazuelas__panel.is-swapping { animation: none; }
+  }
+</style>

@@ -1,0 +1,136 @@
+@import "@spark-line/web-framework/styles/foundation.css";
+
+:root {
+  --project-surface-default: #f6ead9;
+  --project-surface-inverse: #2e1b12;
+  --project-surface-clay: #2e1b12;
+  --project-surface-terra: #b4552d;
+  --project-surface-terra-deep: #8a3d1f;
+  --project-text-default: #24170f;
+  --project-text-inverse: #f6ead9;
+  --project-action-background: #b4552d;
+  --project-action-foreground: #fff7ec;
+  --project-accent-flor: #b4325f;
+  --project-line-clay: rgba(46, 27, 18, 0.18);
+
+  --project-font-display: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --project-font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+
+  --project-type-display: clamp(3.2rem, 11vw, 9.5rem);
+  --project-type-h2: clamp(2rem, 4.5vw, 3.6rem);
+  --project-type-body: clamp(1.125rem, 0.4vw + 1rem, 1.25rem);
+
+  --project-radius-sm: 0.375rem;
+  --project-radius-md: 0.875rem;
+}
+
+:where(html) {
+  font-family: var(--project-font-body);
+  color: var(--project-text-default);
+  background: var(--project-surface-default);
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(html) {
+    scroll-behavior: auto;
+  }
+}
+
+:where(body) {
+  margin: 0;
+  font-size: var(--project-type-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(h1, h2, h3),
+:where(.slf-heading[data-size="display"]),
+:where(.slf-heading[data-size="h1"]),
+:where(.slf-heading[data-size="h2"]) {
+  font-family: var(--project-font-display);
+  font-optical-sizing: auto;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+}
+
+.concept-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.75rem;
+  padding-inline: var(--slf-gutter);
+  background: color-mix(in srgb, var(--project-surface-default) 88%, transparent);
+  backdrop-filter: blur(0.5rem);
+  border-block-end: 1px solid var(--project-line-clay);
+}
+
+.concept-header__brand {
+  font-family: var(--project-font-display);
+  font-size: 1.125rem;
+  letter-spacing: 0.02em;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.concept-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.concept-header__link {
+  font-size: 1rem;
+  color: inherit;
+  text-decoration: none;
+  border-block-end: 1px solid transparent;
+}
+
+.concept-header__link:hover,
+.concept-header__link:focus-visible {
+  border-block-end-color: currentColor;
+}
+
+@media (max-width: 40rem) {
+  .concept-header__link--quiet,
+  .concept-header__link--visit {
+    display: none;
+  }
+
+  .concept-header__brand {
+    font-size: 1rem;
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.no-js .reveal {
+  opacity: 1;
+  transform: none;
+}

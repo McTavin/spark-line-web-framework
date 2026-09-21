@@ -1,0 +1,516 @@
+---
+import { PageFlow, Section, Container, Stack, Heading, Text, Action } from "@spark-line/web-framework/astro";
+import CazuelaRow from "../components/CazuelaRow.astro";
+import "../styles/project.css";
+---
+
+<html lang="es-MX" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="Propuesta independiente de sitio web para La Puerta de Tres Marías, sucursal Cuernavaca. Concepto de diseño, sin afiliación con el establecimiento." />
+    <title>La Puerta de Tres Marías · Cuernavaca | Propuesta de sitio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Instrument+Sans:wght@400..600&display=swap" />
+  </head>
+  <body>
+    <PageFlow>
+  <header class="concept-header">
+    <a class="concept-header__brand" href="#inicio">La Puerta · Cuernavaca</a>
+    <nav class="concept-header__nav" aria-label="Secciones">
+      <a class="concept-header__link concept-header__link--quiet" href="#recuerdos">Recuerdos</a>
+      <a class="concept-header__link concept-header__link--visit" href="#visita">Cómo llegar</a>
+      <Action href="tel:+527774823728" variant="secondary" size="sm">Llamar</Action>
+    </nav>
+  </header>
+
+  <section id="inicio" class="hero" aria-label="Presentación">
+    <div class="hero__light" aria-hidden="true"></div>
+    <Container width="wide">
+      <div class="hero__inner">
+        <p class="hero__eyebrow">Comida mexicana de casa · Cuernavaca</p>
+        <div class="hero__stage">
+          <h1 class="hero__name" aria-label="La Puerta de Tres Marías">
+            <span aria-hidden="true">La&nbsp;Puerta</span><br />
+            <span class="hero__name-sub" aria-hidden="true">de Tres Marías</span>
+          </h1>
+          <div class="hero__pots" aria-hidden="true">
+            {Array.from({ length: 5 }, (_, i) => (
+              <svg class={`pot pot--${i + 1}`} viewBox="0 0 120 78" focusable="false">
+                <use href="#cazuela" />
+              </svg>
+            ))}
+          </div>
+        </div>
+        <p class="hero__line">
+          Sabor de cocina familiar, del desayuno a la sobremesa.
+        </p>
+        <div class="hero__actions">
+          <Action href="#visita" variant="primary">Planea tu visita</Action>
+          <Action href="#recuerdos" variant="secondary">Qué recuerdan quienes vinieron</Action>
+        </div>
+        <p class="hero__cue" aria-hidden="true">Desliza para conocer la casa</p>
+      </div>
+    </Container>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="cazuela" viewBox="0 0 120 78">
+        <path d="M8 26c0-4 3-6 8-6h88c5 0 8 2 8 6 0 26-18 46-52 46S8 52 8 26Z" fill="var(--pot-body, #9c4a24)" />
+        <ellipse cx="60" cy="22" rx="52" ry="9" fill="var(--pot-rim, #b4552d)" />
+        <ellipse cx="60" cy="22" rx="42" ry="6.5" fill="var(--pot-inside, #3a2216)" />
+        <path d="M4 20c-4 0-6 3-5 7 1 5 6 7 12 7l4-12H4Zm112 0h-11l4 12c6 0 11-2 12-7 1-4-1-7-5-7Z" fill="var(--pot-body, #9c4a24)" />
+        <path d="M22 40c8 14 24 22 38 22s30-8 38-22" stroke="rgba(255,244,230,.14)" stroke-width="3" fill="none" stroke-linecap="round" />
+      </symbol>
+    </svg>
+  </section>
+
+  <Section id="casa" theme="default" spaceTop="xl" spaceBottom="xl">
+    <Container width="content">
+      <div class="casa-grid">
+        <Stack gap="md" class="reveal">
+          <Heading level={2} size="h2">Una casa<span class="casa-accent"> de familia</span></Heading>
+          <Text>
+            La Puerta de Tres Marías se describe en sus propias publicaciones
+            como un restaurante familiar: comida mexicana casera para ir todos,
+            con espacio de juegos para las niñas y los niños.
+          </Text>
+          <Text tone="muted" size="body">
+            Nota honesta de esta propuesta: no encontramos un sitio web
+            oficial de esta sucursal durante la investigación
+            (20 de septiembre de 2026). Lo que ves aquí es un concepto
+            independiente hecho con datos públicos verificables.
+          </Text>
+        </Stack>
+        <div class="casa-art reveal" style="--reveal-delay: 120ms" role="img" aria-label="Ilustración decorativa de una rama de bugambilia, no una fotografía del lugar">
+          <svg viewBox="0 0 220 260" focusable="false">
+            <path d="M40 250C70 190 60 140 96 96c26-32 60-44 88-42" stroke="#3e5c46" stroke-width="5" fill="none" stroke-linecap="round" />
+            <path d="M96 96c-18-6-34-2-44 10m88-52c-4-18 2-32 14-40m40 82c14 8 22 22 22 38" stroke="#3e5c46" stroke-width="4" fill="none" stroke-linecap="round" />
+            {Array.from({ length: 9 }, (_, i) => {
+              const pts = [[118, 60], [140, 44], [160, 58], [128, 82], [152, 92], [176, 76], [104, 118], [132, 128], [158, 116]];
+              const [x, y] = pts[i];
+              return (
+                <g transform={`translate(${x} ${y})`}>
+                  <path d="M0-12C7-12 12-6 12 1 12 8 6 13 0 13-6 13-12 8-12 1-12-6-7-12 0-12Z" fill="var(--project-accent-flor)" opacity={0.86} />
+                  <path d="M0-7c4 0 7 3 7 7 0 4-3 7-7 7" fill="#d9537f" opacity="0.9" />
+                </g>
+              );
+            })}
+          </svg>
+          <span class="casa-art__tag">ilustración, no fotografía del lugar</span>
+        </div>
+      </div>
+    </Container>
+  </Section>
+
+  <Section id="recuerdos" theme="inverse" spaceTop="xl" spaceBottom="xl" class="recuerdos">
+    <Container width="wide">
+      <CazuelaRow />
+    </Container>
+  </Section>
+
+  <Section id="reputacion" theme="quiet" spaceTop="xl" spaceBottom="xl" class="reputacion">
+    <Container width="content">
+      <div class="stats reveal">
+        <div class="stats__item">
+          <p class="stats__num">4.3</p>
+          <p class="stats__label">en Google</p>
+        </div>
+        <div class="stats__item">
+          <p class="stats__num">≈1,100</p>
+          <p class="stats__label">reseñas</p>
+        </div>
+        <div class="stats__item">
+          <p class="stats__num">1951</p>
+          <p class="stats__label">origen del grupo, en Tres Marías</p>
+        </div>
+      </div>
+      <p class="stats__note reveal">
+        Calificación y conteo observados el 20 de septiembre de 2026 en espejos
+        de terceros (pos.do y Restaurant Guru) de los datos de Google. El
+        conteo exacto varía entre fuentes, por eso aparece redondeado. El dato
+        de 1951 corresponde al restaurante original del grupo en la zona de
+        Huitzilac, según prensa regional de 2019, no a esta sucursal.
+      </p>
+    </Container>
+  </Section>
+
+  <Section id="visita" theme="default" spaceTop="xl" spaceBottom="xl">
+    <Container width="content">
+      <Stack gap="lg">
+        <Heading level={2} size="h2" class="visita-title reveal">Visítanos</Heading>
+        <div class="visita-grid">
+          <div class="visita-card reveal">
+            <h3 class="visita-card__title">Dónde</h3>
+            <p>Av. Río Mayo 1490, col. Vista Hermosa,<br />C.P. 62290, Cuernavaca, Morelos.</p>
+            <Action
+              href="https://www.google.com/maps/search/?api=1&query=La%20Puerta%20de%20Tres%20Mar%C3%ADas%2C%20Av.%20R%C3%ADo%20Mayo%201490%2C%20Cuernavaca"
+              variant="primary"
+              rel="noopener"
+              target="_blank"
+            >
+              Abrir en Google Maps
+            </Action>
+          </div>
+          <div class="visita-card reveal" style="--reveal-delay: 90ms">
+            <h3 class="visita-card__title">Cuándo</h3>
+            <p>
+              Horario publicado por terceros: 08:00 a 18:00, todos los días.
+              Es un solo dato y no está confirmado por el restaurante:
+              conviene verificar por teléfono antes de ir.
+            </p>
+          </div>
+          <div class="visita-card reveal" style="--reveal-delay: 180ms">
+            <h3 class="visita-card__title">Cómo contactar</h3>
+            <p>Teléfono: +52 777 482 3728.</p>
+            <p>
+              No encontramos un canal de reservaciones confirmado durante la
+              investigación. Pedidos a domicilio: existe una página de la
+              sucursal en Uber Eats (enlace de terceros).
+            </p>
+            <Action href="tel:+527774823728" variant="secondary">Llamar ahora</Action>
+          </div>
+        </div>
+      </Stack>
+    </Container>
+  </Section>
+
+  <Section as="footer" theme="inverse" spaceTop="lg" spaceBottom="lg" class="pie">
+    <Container width="content">
+      <Stack gap="sm">
+        <p class="pie__disclaimer">
+          Propuesta independiente de sitio web. Sin afiliación ni aprobación
+          del establecimiento.
+        </p>
+        <p class="pie__meta">
+          Datos públicos verificados el 20 de septiembre de 2026. Nada de este
+          sitio debe leerse como información oficial del restaurante. Las
+          fuentes y los conflictos entre ellas están documentados en las notas
+          de investigación del proyecto.
+        </p>
+        <p class="pie__meta">
+          <a class="pie__link" href="/presentacion/">Ver la presentación de la propuesta</a>
+        </p>
+      </Stack>
+    </Container>
+  </Section>
+    </PageFlow>
+  </body>
+</html>
+
+<script>
+  document.documentElement.classList.remove("no-js");
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        }
+      }
+    },
+    { threshold: 0.15 }
+  );
+  for (const el of document.querySelectorAll(".reveal")) io.observe(el);
+</script>
+
+<style is:global>
+  html { background: var(--project-surface-default); }
+</style>
+
+<style>
+  .hero {
+    position: relative;
+    min-block-size: 100svh;
+    display: flex;
+    align-items: center;
+    overflow: clip;
+    background:
+      radial-gradient(120% 90% at 50% 115%, #caa06a 0%, transparent 55%),
+      linear-gradient(180deg, #f2dfc4 0%, #edcfa8 48%, #d9a878 100%);
+    color: var(--project-text-default);
+  }
+
+  .hero__light {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(90% 70% at 18% 8%, rgba(255, 246, 224, 0.9), transparent 60%);
+    opacity: 0.25;
+    animation: hero-warm 1400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    pointer-events: none;
+  }
+
+  @keyframes hero-warm {
+    from { opacity: 0.1; transform: translateX(-6%); }
+    to { opacity: 0.75; transform: translateX(0); }
+  }
+
+  .hero__inner {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    padding-block: clamp(4.5rem, 12svh, 7rem) clamp(2rem, 6svh, 3.5rem);
+    gap: clamp(0.75rem, 2svh, 1.5rem);
+  }
+
+  .hero__eyebrow {
+    margin: 0;
+    font-size: 1rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--project-surface-terra-deep);
+    animation: fade-up 700ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero__stage {
+    position: relative;
+    padding-block-end: 0;
+  }
+
+  .hero__name {
+    margin: 0;
+    font-family: var(--project-font-display);
+    font-size: var(--project-type-display);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+    color: #43220f;
+    animation: name-rise 900ms 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero__name-sub {
+    display: inline-block;
+    margin-block-start: 0.18em;
+    font-size: 0.32em;
+    letter-spacing: 0.08em;
+    font-style: italic;
+    color: #6b3a1c;
+  }
+
+  @keyframes name-rise {
+    from { opacity: 0; transform: translateY(0.4em); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero__pots {
+    position: absolute;
+    inset-inline: -6%;
+    inset-block-start: auto;
+    inset-block-end: 0;
+    transform: translateY(38%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: clamp(0.25rem, 1.2vw, 1.25rem);
+    pointer-events: none;
+  }
+
+  .pot {
+    display: block;
+    inline-size: clamp(100px, 15%, 205px);
+    transform-origin: 50% 100%;
+    animation: pot-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .pot--1 { --pot-body: #9c4a24; margin-block-start: 26px; animation-delay: 120ms; rotate: -2deg; }
+  .pot--2 { --pot-body: #b4552d; margin-block-start: 8px; animation-delay: 210ms; }
+  .pot--3 { --pot-body: #8a3d1f; margin-block-start: 0; animation-delay: 300ms; scale: 1.18; }
+  .pot--4 { --pot-body: #a8492a; margin-block-start: 10px; animation-delay: 390ms; }
+  .pot--5 { --pot-body: #b4552d; margin-block-start: 24px; animation-delay: 480ms; rotate: 2deg; }
+
+  @keyframes pot-rise {
+    from { opacity: 0; transform: translateY(14vh) rotate(3deg); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero__line {
+    margin: clamp(2.5rem, 6svh, 4rem) 0 0;
+    max-inline-size: 34ch;
+    font-size: var(--project-type-body);
+    color: #4a2a15;
+    animation: fade-up 700ms 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    animation: fade-up 700ms 1000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero__cue {
+    margin: 0;
+    font-size: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6b3a1c;
+    animation: fade-up 700ms 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @media (max-width: 48rem) {
+    .pot--1, .pot--5 { display: none; }
+    .pot { inline-size: clamp(72px, 21vw, 118px); }
+    .hero__pots { gap: 0.9rem; transform: translateY(50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__light, .hero__name, .hero__eyebrow, .hero__line, .hero__actions, .hero__cue, .pot {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .hero__pots {
+        animation: pots-handoff linear both;
+        animation-timeline: view(block);
+        animation-range: exit-crossing 0% exit 100%;
+      }
+
+      @keyframes pots-handoff {
+        to {
+          transform: translateY(-6%);
+          opacity: 0.55;
+        }
+      }
+    }
+  }
+
+  .casa-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+  }
+
+  @media (max-width: 48rem) {
+    .casa-grid { grid-template-columns: 1fr; }
+  }
+
+  .casa-accent { color: var(--project-accent-flor); }
+
+  .casa-art {
+    position: relative;
+    padding: 1.5rem;
+    background: linear-gradient(160deg, #f9efdf, #f0dcbe);
+    border-radius: var(--project-radius-md);
+    box-shadow: 0 18px 40px -28px rgba(46, 27, 18, 0.5);
+  }
+
+  .casa-art svg { display: block; inline-size: 100%; block-size: auto; }
+
+  .casa-art__tag {
+    display: block;
+    margin-block-start: 0.75rem;
+    font-size: 1rem;
+    color: #6b4a2f;
+  }
+
+  .reputacion {
+    --project-surface-quiet: #efdcc0;
+    --project-text-quiet: #3c2515;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    text-align: center;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 2.75rem) 1rem;
+    border: 1px solid rgba(60, 37, 21, 0.16);
+    border-radius: var(--project-radius-md);
+    background: rgba(255, 247, 236, 0.55);
+  }
+
+  @media (max-width: 40rem) {
+    .stats { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+
+  .stats__item + .stats__item {
+    border-inline-start: 1px solid rgba(60, 37, 21, 0.14);
+  }
+
+  @media (max-width: 40rem) {
+    .stats__item + .stats__item { border-inline-start: 0; }
+  }
+
+  .stats__num {
+    margin: 0;
+    font-family: var(--project-font-display);
+    font-size: clamp(2.75rem, 7vw, 4.75rem);
+    line-height: 1;
+    color: var(--project-surface-terra-deep);
+  }
+
+  .stats__label {
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b4a2f;
+  }
+
+  .stats__note {
+    margin: 1.25rem auto 0;
+    max-inline-size: 68ch;
+    text-align: center;
+    font-size: 1rem;
+    color: #6b4a2f;
+  }
+
+  .visita-title { margin: 0; }
+
+  .visita-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: clamp(1rem, 3vw, 2rem);
+  }
+
+  .visita-card {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: linear-gradient(165deg, #faf0e0, #f2e0c4);
+    border-radius: var(--project-radius-md);
+    box-shadow: 0 16px 34px -30px rgba(46, 27, 18, 0.6);
+  }
+
+  .visita-card p { margin: 0; font-size: var(--project-type-body); }
+
+  .visita-card__title {
+    margin: 0;
+    font-family: var(--project-font-display);
+    font-size: 1.6rem;
+    color: var(--project-surface-terra-deep);
+  }
+
+  .pie__disclaimer {
+    margin: 0;
+    font-family: var(--project-font-display);
+    font-size: clamp(1.25rem, 2.6vw, 1.6rem);
+    color: #e08b5a;
+  }
+
+  .pie__meta {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(246, 234, 217, 0.72);
+    max-inline-size: 72ch;
+  }
+
+  .pie__link {
+    color: var(--project-text-inverse);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+</style>
