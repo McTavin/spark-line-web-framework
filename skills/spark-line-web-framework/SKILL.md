@@ -21,7 +21,34 @@ content, and approved visual decisions in the project's v14.23 context.
 
 Do not create a competing design-canon file.
 
-## Inspect before designing
+## Design method and structural responsibility
+
+For website creation or substantive redesign, use the original
+`reference-led-websites` workflow resolved through STYLE (`design_authoring`). This
+framework implements its intended composition and behavior; it does not replace
+reference inspection with a token plan, registry search or gallery exercise.
+Develop provisional appearance and interaction together, prove the defining
+slice, then extract broader reusable roles. For a bounded correction, preserve
+the accepted design and do not restart the website-authoring workflow.
+
+An exact component match must preserve the intended visual and interaction
+relationships. A similarly named card, dialog or accordion is not an exact match
+when it changes the experience. Extend or compose the implementation rather than
+silently simplifying the brief. Keep project-owned roles project-owned.
+
+Use `layout-system-audit` for a requested layout, typography or combined system
+pass, reading its full selected checklists and effective Settings. It audits the
+existing declared system; its numerical profiles are fallbacks, not another art
+direction or a mandate to resize accepted components. Preserve scope: layout
+alone does not authorize a type reset, and audit alone does not authorize edits.
+
+Mode Mirror derives the counterpart of the project's approved source mode, not
+a shared palette. Keep its results in the project's existing token or generator
+owner. Include supported mode-specific weights in the layout/type role settings
+rather than letting one specialist undo the other. Resolve both skills from
+actual delivered source. Do not replace their methods with framework defaults.
+
+## Inspect before implementing
 
 Before editing:
 
@@ -47,12 +74,14 @@ Before editing:
    compatibility metadata. Retrieve actual CMS records through the project's
    authenticated content path, never through the component catalog.
 
-When a reference points to an existing site component, use its real structure
-and approved tokens. Do not approximate it from memory.
+When a reference points to an accepted project component, use its real structure
+and approved tokens. For external references, preserve the selected design
+relationships while adapting client identity and licensed assets. Do not infer
+reuse rights or approximate the reference from memory.
 
 ## Source components in this order
 
-1. Reuse an exact registered component.
+1. Reuse an exact registered component compatible with the intended experience.
 2. Add a typed variant when structure, semantics, and behavior are unchanged.
 3. Compose registered primitives.
 4. Create a component only for genuinely new structure or behavior.
@@ -105,9 +134,16 @@ Run the checklist in [qa-checklist.md](references/qa-checklist.md). At minimum:
    run `node "<skill-root>/scripts/audit_layout.mjs" <paths...>` only when the
    changed paths include section composition, layout CSS, or visual-frame
    behavior. Do not resolve the script relative to the consumer repository.
-6. Reuse successful evidence for the unchanged SHA. Rerun a check only when its
-   inputs, environment, prior result, or concrete risk changed.
-7. Report results with the fixed schema in `qa-checklist.md`. Report every
+6. Bind results to the revision/build actually exercised and follow the
+   repository's reuse and invalidation rules. Historical observations need not
+   track HEAD and do not automatically attest a later candidate. Do not commit
+   solely to refresh an observation to its containing commit; use existing
+   check runs and task/PR reporting for later results.
+7. Report relevant framework results with `qa-checklist.md`. When a specialist
+   audit is active, also retain that source's required ledger, settings and
+   statuses; cross-reference the same observations instead of running duplicate
+   browser passes solely for separate reports. A complete specialist audit is
+   not reduced to the framework's starting desktop/mobile sample. Report every
    deviation; do not silently reinterpret one as an exception.
 
 For repository delivery, Save performs Git protection only. Preview should
