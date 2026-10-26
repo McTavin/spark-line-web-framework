@@ -206,6 +206,29 @@ requests both `design_authoring` and `web_framework`; structural-only work may
 request `web_framework`. Version drift is advisory and must never edit
 dependencies automatically.
 
+## Optional reader (prerelease)
+
+`@spark-line/web-framework/reader` exports `ReaderDialog`. It is an Astro component with a small standalone browser enhancer; it does not require React, Nimbus, a Markdown parser, or the global foundation stylesheet. It is an experimental catalog entry in `0.2.2-reader.0`, not an npm release.
+
+```astro
+---
+import { ReaderDialog } from '@spark-line/web-framework/reader';
+// The host prepares and sanitizes its published article body at build time.
+const { title, html, markdownUrl } = preparedArticle;
+---
+<ReaderDialog id="article-reader" title={title} lang="en" markdownUrl={markdownUrl}>
+  <Fragment set:html={html} />
+</ReaderDialog>
+```
+
+The slot is the prepared body, without a second title. Pass only trusted sanitized HTML, for example from `prepareReaderDocument` in the existing content-projection package. This UI does not sanitize a slot or execute Markdown/MDX. Give the dialog and prepared content distinct page-scoped IDs. The host owns public/draft gating, route opt-in, canonical metadata and the direct Markdown URL.
+
+The trigger stays hidden without JavaScript, with a direct Markdown link as fallback. A rendered component loads its own CSS/module URLs; omit it to omit those resources. Native dialog supplies modality, focus containment and Escape. The enhancer lazily mounts the inert template, restores focus/scroll on close, focuses internal anchors, and cleans up when a client router removes its custom element. Tables and code get labeled keyboard-scrollable regions. Other links retain normal navigation. No history entry, alternate route, stored preference or reader canonical is created.
+
+`labels` overrides `open`, `close`, `markdown`, `mode`, `table` and `code`; `lang` belongs to the article. Optional CSS properties: `--reader-paper`, `--reader-ink`, `--reader-accent`, `--reader-font`, `--reader-size`. Check contrast after customization. Controls wrap; layout accommodates dynamic viewports, safe areas, large text and reduced motion.
+
+Packed Astro-only/React fixtures and Chromium keyboard/axe checks cover this export. The starter adds generated-Markdown parity, hidden-page cleanup, mobile/large-text/spacing and navigation/teardown checks. Manual assistive-technology and Safari/Firefox review remain useful before a client release.
+
 ## Development and release
 
 ```sh

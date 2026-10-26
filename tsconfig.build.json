@@ -25,6 +25,7 @@
     "src/react/**/*.tsx",
     "src/sanity/**/*.ts",
     "src/registry/**/*.ts",
-    "src/catalog/**/*.ts"
+    "src/catalog/**/*.ts",
+    "src/reader/**/*.ts"
   ]
 }

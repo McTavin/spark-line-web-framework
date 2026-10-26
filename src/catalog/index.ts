@@ -329,7 +329,7 @@ export function createFrameworkCatalogManifest({
         },
         package: {
           name: "@spark-line/web-framework",
-          version: "0.2.1",
+          version: "0.2.2-reader.0",
           export: framework === "astro" ? "./astro" : "./react"
         },
         composition: definition.composition!,
@@ -337,6 +337,15 @@ export function createFrameworkCatalogManifest({
       });
     }
   }
+  const reader = frameworkRegistry.require('reader-dialog');
+  components.push({
+    id: reader.id, name: 'Reader Dialog', description: 'Optional modal reading view for prepared content.',
+    framework: 'astro', kind: reader.kind, scope: 'system', variants: reader.variants,
+    scenarios: reader.scenarios, status: reader.status,
+    source: { repository, path: 'src/astro/ReaderDialog.astro', commit },
+    package: { name: '@spark-line/web-framework', version: '0.2.2-reader.0', export: './reader' },
+    composition: reader.composition!, tags: ['optional', 'reader', 'accessible'],
+  });
   return defineCatalogManifest({
     schema_version: CATALOG_SCHEMA_VERSION,
     generated_from: { repository, path: "src/catalog/index.ts", commit },

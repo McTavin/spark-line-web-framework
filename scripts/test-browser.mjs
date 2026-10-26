@@ -106,13 +106,31 @@ try {
         fullPage: true
       });
 
+      await page.goto(`${origin}/reader/`, { waitUntil: 'networkidle' });
+      const readerTrigger = page.getByRole('button', { name: 'Open reader mode' });
+      await readerTrigger.focus();
+      await page.keyboard.press('Enter');
+      const reader = page.getByRole('dialog');
+      if (!await reader.isVisible()) throw new Error('Reader did not open');
+      if (!await page.getByRole('button', { name: 'Close reader' }).evaluate(node => node === document.activeElement)) throw new Error('Reader initial focus');
+      await assertAccessible(page, 'reader');
+      await reader.getByRole('link', { name: 'Go to the next section' }).click();
+      if (!await reader.locator('#fixture-next').evaluate(node => node === document.activeElement)) throw new Error('Reader anchor focus');
+      await page.keyboard.press('Escape');
+      if (await reader.isVisible() || !await readerTrigger.evaluate(node => node === document.activeElement)) throw new Error('Reader focus restoration');
+      await readerTrigger.click();
+      await page.setViewportSize({ width: 390, height: 844 });
+      if (!await reader.evaluate(node => node.scrollWidth <= node.clientWidth)) throw new Error('Reader mobile overflow');
+      await page.screenshot({ path: path.join(screenshotDirectory, 'reader-390x844.png'), fullPage: true });
+      await page.getByRole('button', { name: 'Close reader' }).click();
+
       await writeFile(
         path.join(screenshotDirectory, "verification.json"),
         `${JSON.stringify(
           {
             origin,
             viewports: ["1280x900", "390x844"],
-            interactions: ["tabs", "carousel", "dialog", "menu"],
+            interactions: ["tabs", "carousel", "dialog", "menu", "reader"],
             accessibility: "axe:0 serious-or-critical violations",
             reducedMotion: true,
             horizontalOverflow: false

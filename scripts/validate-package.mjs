@@ -6,6 +6,8 @@ const root = path.resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
 const expectedExports = [
   "./astro",
+  "./reader",
+  "./reader/client",
   "./react",
   "./sanity",
   "./registry",
@@ -19,7 +21,7 @@ for (const key of expectedExports) {
 }
 
 if (manifest.name !== "@spark-line/web-framework") failures.push("unexpected package name");
-if (manifest.version !== "0.2.1") failures.push("unexpected package version");
+if (manifest.version !== "0.2.2-reader.0") failures.push("unexpected package version");
 if (!manifest.peerDependencies?.astro) failures.push("Astro must be a peer dependency");
 for (const optionalPeer of ["react", "react-dom", "sanity"]) {
   if (!manifest.peerDependenciesMeta?.[optionalPeer]?.optional) {

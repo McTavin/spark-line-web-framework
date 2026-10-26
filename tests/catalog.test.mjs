@@ -76,10 +76,15 @@ test("framework catalog declares Astro and React parity for stable presentationa
   const manifest = createFrameworkCatalogManifest({ commit });
   const pairs = new Map();
   for (const component of manifest.components) {
+    if (component.id === 'reader-dialog') continue;
     if (!pairs.has(component.id)) pairs.set(component.id, new Set());
     pairs.get(component.id).add(component.framework);
   }
-  assert.equal(manifest.components.length, 16);
+  assert.equal(manifest.components.length, 17);
+  const reader = manifest.components.find(component => component.id === 'reader-dialog');
+  assert.equal(reader.framework, 'astro');
+  assert.equal(reader.status, 'experimental');
+  assert.equal(reader.package.export, './reader');
   for (const frameworks of pairs.values()) assert.deepEqual([...frameworks].sort(), ["astro", "react"]);
   assert.ok(manifest.components.every((component) => component.scope === "system"));
   assert.deepEqual(manifest.composition_profiles, [WEB_FRAMEWORK_LAYOUT_PROFILE]);

@@ -24,3 +24,7 @@ const moduleSource = components
   .join("\n");
 
 await writeFile(new URL("index.js", output), `${moduleSource}\n`, "utf8");
+
+const readerOutput = new URL("../dist/reader/", import.meta.url);
+await mkdir(readerOutput, { recursive: true });
+await writeFile(new URL("index.js", readerOutput), 'export { default as ReaderDialog } from "../../src/astro/ReaderDialog.astro";\n', "utf8");

@@ -65,6 +65,7 @@ await Promise.all(fixtures.map(async (fixture) => {
     rootPackage.dependencies["@spark-line/web-framework"] = `file:${tarball}`;
     frameworkPackage.resolved = `file:${tarball}`;
     frameworkPackage.integrity = tarballIntegrity;
+    frameworkPackage.version = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')).version;
     await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`, "utf8");
   } catch (error) {
     if (error.code !== "ENOENT") throw error;

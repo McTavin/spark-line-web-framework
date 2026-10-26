@@ -1,0 +1,31 @@
+---
+import readerStyles from "../../styles/reader.css?url";
+import readerClient from "../../dist/reader/client.js?url";
+/** Content must be prepared/sanitized at build time. This component never parses Markdown. */
+export interface Props {
+  id: string;
+  title: string;
+  markdownUrl: string;
+  lang?: string;
+  labels?: Partial<{ open: string; close: string; markdown: string; mode: string; table: string; code: string }>;
+}
+const { id, title, markdownUrl, lang, labels: supplied = {} } = Astro.props;
+const labels = { open: 'Open reader mode', close: 'Close reader', markdown: 'View Markdown',
+  mode: 'Reader mode', table: 'Scrollable table', code: 'Scrollable code', ...supplied };
+---
+<link rel="stylesheet" href={readerStyles} />
+<script type="module" src={readerClient} is:inline></script>
+<slf-reader data-table-label={labels.table} data-code-label={labels.code}>
+  <div class="slf-reader-actions" data-pagefind-ignore>
+    <button type="button" data-reader-open aria-haspopup="dialog" aria-controls={id} hidden>{labels.open}</button>
+    <a href={markdownUrl} type="text/markdown">{labels.markdown}</a>
+  </div>
+  <dialog id={id} class="slf-reader-dialog" aria-label={`${labels.mode}: ${title}`} lang={lang} data-pagefind-ignore>
+    <div class="slf-reader-toolbar">
+      <p>{labels.mode}<span>{title}</span></p>
+      <button type="button" data-reader-close autofocus>{labels.close}<span aria-hidden="true"> ×</span></button>
+    </div>
+    <div class="slf-reader-rail" data-reader-body></div>
+    <template data-reader-content><article class="slf-reader-prose"><h1>{title}</h1><slot /></article></template>
+  </dialog>
+</slf-reader>

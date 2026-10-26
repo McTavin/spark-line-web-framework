@@ -1,0 +1,22 @@
+---
+import { ReaderDialog } from '@spark-line/web-framework/reader';
+---
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width" /><title>Optional reader fixture</title></head>
+  <body>
+    <main>
+      <h1>A page with an optional reader</h1>
+      <p>The page remains available without JavaScript. This fixture uses prepared HTML, with no Markdown parser or framework runtime.</p>
+      <ReaderDialog id="fixture-reader" title="A useful article" markdownUrl="/article.md">
+        <p><a href="#fixture-next">Go to the next section</a></p>
+        <p>A reader can present the same content with a comfortable line length.</p>
+        <h2 id="fixture-next">The next section</h2>
+        <p>The link should move keyboard focus here, without changing the page URL.</p>
+        <table><thead><tr><th>One</th><th>Two</th></tr></thead><tbody><tr><td>Meaning</td><td>Presentation</td></tr></tbody></table>
+        <pre><code>A line of plain code.</code></pre>
+      </ReaderDialog>
+      <a href="/">Return home</a>
+    </main>
+  </body>
+</html>

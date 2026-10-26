@@ -9,6 +9,7 @@ import {
 test("framework registry includes every public primitive and reference island", () => {
   for (const id of [
     "page-flow",
+    "reader-dialog",
     "section",
     "section-group",
     "container",

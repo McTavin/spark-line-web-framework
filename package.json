@@ -1,11 +1,12 @@
 {
   "name": "@spark-line/web-framework",
-  "version": "0.2.1",
+  "version": "0.2.2-reader.0",
   "description": "Structural UI contracts and accessible primitives for Astro, optional React islands, and optional Sanity section data.",
   "type": "module",
   "license": "MIT",
   "sideEffects": [
-    "./styles/*.css"
+    "./styles/*.css",
+    "./dist/reader/client.js"
   ],
   "files": [
     "dist/",
@@ -43,7 +44,16 @@
       "default": "./dist/catalog/index.js"
     },
     "./styles/foundation.css": "./styles/foundation.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./reader": {
+      "types": "./src/astro/reader.d.ts",
+      "import": "./dist/reader/index.js",
+      "default": "./dist/reader/index.js"
+    },
+    "./reader/client": {
+      "types": "./dist/reader/client.d.ts",
+      "import": "./dist/reader/client.js"
+    }
   },
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/build.mjs",

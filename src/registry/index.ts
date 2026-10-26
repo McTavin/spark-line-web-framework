@@ -69,6 +69,12 @@ export function defineComponentRegistry<
 
 export const frameworkRegistry = defineComponentRegistry([
   {
+    id: "reader-dialog", kind: "pattern", variants: ["modal"], status: "experimental",
+    provenance: "@spark-line/web-framework/reader",
+    scenarios: [{ id: "long-form", label: "Optional reading view with Markdown fallback" }],
+    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
+  },
+  {
     id: "page-flow",
     kind: "primitive",
     variants: ["main", "div"],
