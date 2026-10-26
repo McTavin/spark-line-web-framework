@@ -1,6 +1,6 @@
 {
   "name": "@spark-line/web-framework",
-  "version": "0.2.2-reader.0",
+  "version": "0.2.2-reader.1",
   "description": "Structural UI contracts and accessible primitives for Astro, optional React islands, and optional Sanity section data.",
   "type": "module",
   "license": "MIT",

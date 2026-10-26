@@ -118,6 +118,15 @@ try {
       if (!await reader.locator('#fixture-next').evaluate(node => node === document.activeElement)) throw new Error('Reader anchor focus');
       await page.keyboard.press('Escape');
       if (await reader.isVisible() || !await readerTrigger.evaluate(node => node === document.activeElement)) throw new Error('Reader focus restoration');
+      if (await page.evaluate(() => document.documentElement.style.overflow) !== '') throw new Error('Reader Escape scroll restoration');
+      await page.locator('slf-reader').evaluate(root => {
+        root.querySelector('[data-reader-open]').click();
+        root.querySelector('[data-reader-close]').click();
+        root.querySelector('[data-reader-open]').click();
+      });
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      if (!await reader.isVisible() || await page.evaluate(() => document.documentElement.style.overflow) !== 'hidden') throw new Error('A queued close event unlocked a reopened reader');
+      await page.getByRole('button', { name: 'Close reader' }).click();
       await readerTrigger.click();
       await page.setViewportSize({ width: 390, height: 844 });
       if (!await reader.evaluate(node => node.scrollWidth <= node.clientWidth)) throw new Error('Reader mobile overflow');

@@ -208,7 +208,7 @@ dependencies automatically.
 
 ## Optional reader (prerelease)
 
-`@spark-line/web-framework/reader` exports `ReaderDialog`. It is an Astro component with a small standalone browser enhancer; it does not require React, Nimbus, a Markdown parser, or the global foundation stylesheet. It is an experimental catalog entry in `0.2.2-reader.0`, not an npm release.
+`@spark-line/web-framework/reader` exports `ReaderDialog`. It is an Astro component with a small standalone browser enhancer; it does not require React, Nimbus, a Markdown parser, or the global foundation stylesheet. It is an experimental catalog entry in `0.2.2-reader.1`, not an npm release.
 
 ```astro
 ---

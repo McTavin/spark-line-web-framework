@@ -15,6 +15,7 @@ export function mountReader(root: HTMLElement): () => void {
     if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     previousFocus = null;
   };
+  const close = () => { dialog.close(); restore(); };
   const resize = new ResizeObserver(() => {
     const toolbar = dialog.querySelector<HTMLElement>('.slf-reader-toolbar');
     if (toolbar) dialog.style.setProperty('--reader-toolbar-size', `${toolbar.offsetHeight + 24}px`);
@@ -24,6 +25,8 @@ export function mountReader(root: HTMLElement): () => void {
   openButton.hidden = false;
   openButton.addEventListener('click', () => {
     if (dialog.open) return;
+    // An external close() queues its close event; release that old session before reopening.
+    restore();
     previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : openButton;
     if (!body.childElementCount) {
       body.append(template.content.cloneNode(true));
@@ -50,8 +53,10 @@ export function mountReader(root: HTMLElement): () => void {
     restoreScroll = () => { scrollRoot.style.overflow = overflow; window.scrollTo(x, y); };
     closeButton.focus({ preventScroll: true });
   }, options);
-  closeButton.addEventListener('click', () => dialog.close(), options);
-  dialog.addEventListener('close', restore, options);
+  closeButton.addEventListener('click', close, options);
+  dialog.addEventListener('cancel', event => { event.preventDefault(); close(); }, options);
+  // A delayed close event from the preceding session must not unlock a reopened dialog.
+  dialog.addEventListener('close', () => { if (!dialog.open) restore(); }, options);
   body.addEventListener('click', event => {
     const link = (event.target instanceof Element ? event.target : null)?.closest<HTMLAnchorElement>('a[href^="#"]');
     if (!link || event.defaultPrevented || (event instanceof MouseEvent && (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey))) return;

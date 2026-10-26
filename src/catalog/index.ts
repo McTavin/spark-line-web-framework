@@ -329,7 +329,7 @@ export function createFrameworkCatalogManifest({
         },
         package: {
           name: "@spark-line/web-framework",
-          version: "0.2.2-reader.0",
+          version: "0.2.2-reader.1",
           export: framework === "astro" ? "./astro" : "./react"
         },
         composition: definition.composition!,
@@ -343,7 +343,7 @@ export function createFrameworkCatalogManifest({
     framework: 'astro', kind: reader.kind, scope: 'system', variants: reader.variants,
     scenarios: reader.scenarios, status: reader.status,
     source: { repository, path: 'src/astro/ReaderDialog.astro', commit },
-    package: { name: '@spark-line/web-framework', version: '0.2.2-reader.0', export: './reader' },
+    package: { name: '@spark-line/web-framework', version: '0.2.2-reader.1', export: './reader' },
     composition: reader.composition!, tags: ['optional', 'reader', 'accessible'],
   });
   return defineCatalogManifest({
