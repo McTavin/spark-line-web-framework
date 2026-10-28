@@ -85,9 +85,10 @@
       "path": "src/lumos/components/Button.astro",
       "changes": [
         "Replace upstream @/ imports with package-relative paths.",
-        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS.",
+        "Enforce a 44px minimum button/link target height required by Spark interaction contracts."
       ],
-      "sha256": "6f623149131b6131ba219fd27fef8320855c8730010b16c76329924168cc243d"
+      "sha256": "e2d88c53cefbb240b29f75f3b8684c9045af2a8543813513acb6e68ff7fffea7"
     },
     {
       "upstreamPath": "src/components/item/Card.astro",
@@ -128,8 +129,10 @@
       "upstreamPath": "src/utils/slots.ts",
       "upstreamBlob": "367d8b66cd9a2655b4f88a5d6e71867bf25786bd",
       "path": "src/lumos/utils/slots.ts",
-      "changes": [],
-      "sha256": "3bb47b446377f5e23243fcc443178745d917ab3d3ffb865c55df5b04884190dc"
+      "changes": [
+        "Preserve comments within meaningful slot HTML so React/Astro SSR hydration markers survive; still omit empty comment-only slots."
+      ],
+      "sha256": "71bfd3ca31e1d821eb9e134935dbf26ebc24c86b257a18767f80ab2329141a37"
     },
     {
       "upstreamPath": "src/components/media/Icon.astro",

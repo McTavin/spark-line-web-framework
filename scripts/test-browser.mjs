@@ -72,6 +72,11 @@ try {
     });
     try {
       const page = await context.newPage();
+      const hydrationErrors = [];
+      page.on("pageerror", (error) => hydrationErrors.push(error.message));
+      page.on("console", (message) => {
+        if (message.type() === "error" && /hydration|hydrated|Minified React error/i.test(message.text())) hydrationErrors.push(message.text());
+      });
       await page.goto(`${origin}/`, { waitUntil: "networkidle" });
 
       await assertNoOverflow(page);
@@ -136,6 +141,7 @@ try {
       if (await page.locator("astro-island").count() !== 1) throw new Error("Lumos island boundary changed");
       await assertNoOverflow(page);
       await assertAccessible(page, "lumos-island");
+      if (hydrationErrors.length) throw new Error(`Hydration errors: ${hydrationErrors.join("\n")}`);
 
       await writeFile(
         path.join(screenshotDirectory, "verification.json"),

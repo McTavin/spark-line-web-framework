@@ -10,5 +10,7 @@ export async function slotContent(
 ): Promise<string> {
   if (!slots.has(name)) return "";
   const html = await slots.render(name);
-  return html.replace(/<!--[\s\S]*?-->/g, "").trim();
+  // Use a stripped copy only to detect empty slots. Preserve React/Astro SSR
+  // markers in meaningful content so an island can hydrate without recovery.
+  return html.replace(/<!--[\s\S]*?-->/g, "").trim() ? html.trim() : "";
 }
