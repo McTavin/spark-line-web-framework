@@ -42,7 +42,7 @@ test("sanity changes run only the sanity packed fixture", () => {
 });
 
 test("react changes run the react fixture and browser checks without unrelated fixtures", () => {
-  const plan = createVerificationPlan(["src/react/Tabs.tsx"]);
+  const plan = createVerificationPlan(["src/react/Primitives.tsx"]);
 
   assert.equal(plan.profile, "browser");
   assert.equal(plan.needsBrowser, true);

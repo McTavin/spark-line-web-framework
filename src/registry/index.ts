@@ -187,41 +187,5 @@ export const frameworkRegistry = defineComponentRegistry([
     provenance: "@spark-line/web-framework",
     scenarios: [{ id: "native", label: "Native disclosure" }],
     composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
-  },
-  {
-    id: "tabs",
-    kind: "island",
-    variants: ["default"],
-    status: "experimental",
-    provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "keyboard", label: "Keyboard tabs" }],
-    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
-  },
-  {
-    id: "carousel",
-    kind: "island",
-    variants: ["default"],
-    status: "experimental",
-    provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "controls", label: "Previous and next controls" }],
-    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
-  },
-  {
-    id: "dialog",
-    kind: "island",
-    variants: ["modal"],
-    status: "experimental",
-    provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "native", label: "Native modal dialog" }],
-    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
-  },
-  {
-    id: "menu",
-    kind: "island",
-    variants: ["links"],
-    status: "experimental",
-    provenance: "@spark-line/web-framework",
-    scenarios: [{ id: "keyboard", label: "Keyboard menu" }],
-    composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   }
 ] as const);

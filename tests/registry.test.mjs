@@ -6,7 +6,7 @@ import {
   frameworkRegistry
 } from "../dist/registry/index.js";
 
-test("framework registry includes every public primitive and reference island", () => {
+test("framework registry includes every public primitive and excludes retired islands", () => {
   for (const id of [
     "page-flow",
     "section",
@@ -20,14 +20,13 @@ test("framework registry includes every public primitive and reference island", 
     "text",
     "action",
     "card-shell",
-    "disclosure",
-    "tabs",
-    "carousel",
-    "dialog",
-    "menu"
+    "disclosure"
   ]) {
     assert.equal(frameworkRegistry.has(id), true, `${id} is registered`);
     assert.ok(frameworkRegistry.require(id).scenarios.length > 0);
+  }
+  for (const id of ["tabs", "carousel", "dialog", "menu"]) {
+    assert.equal(frameworkRegistry.has(id), false, `${id} is no longer registered`);
   }
 });
 
