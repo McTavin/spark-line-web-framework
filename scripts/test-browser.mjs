@@ -121,8 +121,10 @@ try {
         }
         const button = page.locator("[data-native-button]");
         await button.focus();
+        await button.press("Tab");
+        await page.keyboard.press("Shift+Tab");
         const focus = await button.evaluate((element) => ({ outline: getComputedStyle(element).outlineStyle, height: element.getBoundingClientRect().height }));
-        if (focus.outline === "none" || focus.height < 44) throw new Error("Lumos button focus/target contract failed");
+        if (focus.outline === "none" || focus.height < 44) throw new Error(`Lumos button focus/target contract failed at ${width}: ${JSON.stringify(focus)}`);
         await button.press("Enter");
         await assertAccessible(page, `lumos-${width}`);
         await page.screenshot({ path: path.join(screenshotDirectory, `lumos-${width}.png`), fullPage: true });
