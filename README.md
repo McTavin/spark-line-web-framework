@@ -90,29 +90,50 @@ The registry is available from `@spark-line/web-framework/registry`.
 ## React primitives and islands
 
 The React export contains presentational `Action`, `Heading`, `Text`,
-`CardShell`, `Stack`, `Cluster`, `Grid`, and `Container` equivalents plus the
-reference `Tabs`, `Carousel`, `Dialog`, and `Menu` islands. Presentational
+`CardShell`, `Stack`, `Cluster`, `Grid`, and `Container` equivalents. Presentational
 primitives emit the same semantic classes and data slots as Astro; project CSS
-still owns palette and visual identity. Props for hydrated islands are
-serializable data.
+still owns palette and visual identity. Interactive components belong to the
+consuming project and its selected upstream library. Wrap a chosen React
+component locally, pass serializable props, and hydrate it inside an Astro-owned
+frame:
 
 ```astro
 ---
-import { Tabs } from "@spark-line/web-framework/react";
+import ProjectIsland from "../components/ProjectIsland";
 ---
 
-<Tabs
-  client:visible
-  label="Project sections"
-  items={[
-    { id: "context", label: "Context", content: "Approved source material." },
-    { id: "proof", label: "Proof", content: "Verified outcomes." }
-  ]}
-/>
+<ProjectIsland client:visible />
 ```
 
 Use `client:visible` or `client:idle` by default. Use `client:load` only when the
 interaction must be available immediately.
+
+### Experimental island removal (unreleased)
+
+The experimental `Carousel`, `Dialog`, `Menu`, and `Tabs` exports and their
+associated prop/item types have been removed, along with the `carousel`,
+`dialog`, `menu`, and `tabs` framework registry entries. Stable Astro primitives
+and the eight React presentational primitives above remain available. The test
+suite uses a fixture-only counter to verify React hydration; it is not a public
+component or replacement API.
+
+Before upgrading a consumer, audit its imports from
+`@spark-line/web-framework/react` and references to the removed registry IDs.
+Choose replacements for the actual interaction and migrate props, composition,
+keyboard behavior, focus, and styling explicitly. No drop-in replacement is
+shipped. Keep existing React consumers as React components and hydrate them as
+islands in Astro; do not mechanically port them to Astro or plain JavaScript.
+React Bits components always remain React islands, including `-TS-CSS` variants.
+
+[Nimbus](https://nimbus-docs.com/registry/) and
+[Lumos for Astro](https://lumosframework.com/docs/) provide Astro-native options
+for Astro consumers; [Kumo](https://kumo-ui.com/) provides React controls. Select
+and validate an upstream component before adopting it. This package does not
+install those libraries or add a second CSS foundation.
+
+This is a breaking API change for consumers of the removed experimental
+exports. Existing published versions are unchanged. Publish only as part of a
+new breaking release (at least `0.3.0`), not as a `0.2.x` patch.
 
 ## Exact-ref catalog manifests
 

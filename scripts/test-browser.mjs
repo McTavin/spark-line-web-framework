@@ -75,10 +75,7 @@ try {
       await page.goto(`${origin}/`, { waitUntil: "networkidle" });
 
       await assertNoOverflow(page);
-      await verifyTabs(page);
-      await verifyCarousel(page);
-      await verifyDialog(page);
-      await verifyMenu(page);
+      await verifyConsumerIsland(page);
       await verifyReducedMotion(page);
       await assertAccessible(page, "islands");
       await page.screenshot({
@@ -100,6 +97,9 @@ try {
       if (robots !== "noindex, nofollow") {
         throw new Error(`Style guide robots directive is ${robots ?? "missing"}`);
       }
+      if (await page.locator("astro-island").count()) {
+        throw new Error("The static Astro style guide unexpectedly hydrates an island");
+      }
       await assertAccessible(page, "style-guide");
       await page.screenshot({
         path: path.join(screenshotDirectory, "style-guide-1280x900.png"),
@@ -112,7 +112,8 @@ try {
           {
             origin,
             viewports: ["1280x900", "390x844"],
-            interactions: ["tabs", "carousel", "dialog", "menu"],
+            interactions: ["consumer-owned counter using React primitives"],
+            staticStyleGuideHydrates: false,
             accessibility: "axe:0 serious-or-critical violations",
             reducedMotion: true,
             horizontalOverflow: false
@@ -172,55 +173,20 @@ async function assertNoOverflow(page) {
   if (overflow) throw new Error("Document has horizontal overflow");
 }
 
-async function verifyTabs(page) {
-  const tabs = page.getByRole("tab");
-  await tabs.first().focus();
-  await tabs.first().press("ArrowRight");
-  if ((await tabs.nth(1).getAttribute("aria-selected")) !== "true") {
-    throw new Error("ArrowRight did not select the next tab");
-  }
-  if (!(await tabs.nth(1).evaluate((element) => element === document.activeElement))) {
-    throw new Error("Selected tab did not receive focus");
-  }
-}
-
-async function verifyCarousel(page) {
-  await page.getByRole("button", { name: "Next" }).click();
-  await page.getByText("Navigation decision").waitFor();
-}
-
-async function verifyDialog(page) {
-  const trigger = page.getByRole("button", { name: "Read details" });
-  await trigger.click();
-  const dialog = page.getByRole("dialog");
-  if (!(await dialog.evaluate((element) => element.open))) {
-    throw new Error("Dialog did not open");
-  }
-  await page.keyboard.press("Escape");
-  if (!(await trigger.evaluate((element) => element === document.activeElement))) {
-    throw new Error("Dialog did not return focus to its trigger");
-  }
-}
-
-async function verifyMenu(page) {
-  const trigger = page.getByRole("button", { name: "Open menu" });
-  await trigger.click();
-  const items = page.getByRole("menuitem");
-  if (!(await items.first().evaluate((element) => element === document.activeElement))) {
-    throw new Error("Opening the menu did not focus its first item");
-  }
-  await items.first().press("ArrowDown");
-  if (!(await items.nth(1).evaluate((element) => element === document.activeElement))) {
-    throw new Error("ArrowDown did not move menu focus");
-  }
-  await page.keyboard.press("Escape");
-  if (!(await trigger.evaluate((element) => element === document.activeElement))) {
-    throw new Error("Menu did not return focus to its trigger");
+async function verifyConsumerIsland(page) {
+  const button = page.getByRole("button", { name: "Increment count" });
+  await button.focus();
+  await button.press("Enter");
+  await page.locator("[data-fixture-count]").filter({ hasText: "Count: 1" }).waitFor();
+  await button.click();
+  await page.locator("[data-fixture-count]").filter({ hasText: "Count: 2" }).waitFor();
+  if (!(await button.evaluate((element) => element === document.activeElement))) {
+    throw new Error("The hydrated Action did not preserve focus");
   }
 }
 
 async function verifyReducedMotion(page) {
-  const duration = await page.locator("[data-slf-island='tabs']").evaluate(
+  const duration = await page.locator("[data-fixture-counter] .slf-action").evaluate(
     (element) => getComputedStyle(element).transitionDuration
   );
   const seconds = Number.parseFloat(duration);

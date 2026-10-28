@@ -8,12 +8,7 @@ import {
   Stack,
   Text
 } from "@spark-line/web-framework/astro";
-import {
-  Carousel,
-  Dialog,
-  Menu,
-  Tabs
-} from "@spark-line/web-framework/react";
+import CounterFixture from "../components/CounterFixture";
 ---
 
 <!doctype html>
@@ -27,38 +22,9 @@ import {
     <PageFlow>
       <Section>
         <Stack gap="lg">
-          <Heading level={1}>Interactive reference islands</Heading>
+          <Heading level={1}>Project-owned React island</Heading>
           <Text>Astro owns this section and its spacing.</Text>
-          <Tabs
-            client:load
-            label="Project areas"
-            items={[
-              { id: "context", label: "Context", content: "Source material" },
-              { id: "proof", label: "Proof", content: "Verified output" }
-            ]}
-          />
-          <Carousel
-            client:load
-            label="Decisions"
-            items={[
-              { id: "first", label: "Homepage direction" },
-              { id: "second", label: "Navigation decision" }
-            ]}
-          />
-          <Dialog
-            client:load
-            triggerLabel="Read details"
-            title="Project details"
-            description="Reviewed context belongs with the work."
-          />
-          <Menu
-            client:load
-            label="Open menu"
-            items={[
-              { id: "home", label: "Home", href: "/" },
-              { id: "guide", label: "Style guide", href: "/style-guide/" }
-            ]}
-          />
+          <CounterFixture client:load initialCount={0} />
         </Stack>
       </Section>
     </PageFlow>
