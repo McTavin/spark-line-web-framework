@@ -241,3 +241,7 @@ with the tarball, catalog, dependency resolution, digests, browser evidence,
 and screenshots. The publish job downloads and verifies that candidate, uses
 npm Trusted Publishing, polls registry integrity, and creates `v0.2.1` only
 after the registry matches.
+
+## Nimbus and Lumos foundation (0.3.0 candidate)
+
+New static sites can use the nine source-pinned Astro components from `@spark-line/web-framework/lumos` with `styles/lumos.css`. Nimbus keeps publishing/content/metadata ownership; Spark keeps contracts and provenance. See [the Lumos integration and source notices](src/lumos/README.md). Legacy entry points remain available; choose one CSS foundation per site. No package publication is performed by this change.

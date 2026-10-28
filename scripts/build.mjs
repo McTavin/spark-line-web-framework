@@ -24,3 +24,14 @@ const moduleSource = components
   .join("\n");
 
 await writeFile(new URL("index.js", output), `${moduleSource}\n`, "utf8");
+
+const lumosOutput = new URL("../dist/lumos/", import.meta.url);
+await mkdir(lumosOutput, { recursive: true });
+const lumos = {
+  Section: "wrapper/Section", ContentWrapper: "wrapper/ContentWrapper", Grid: "wrapper/Grid",
+  Heading: "typography/Heading", Paragraph: "typography/Paragraph", Eyebrow: "typography/Eyebrow",
+  RichText: "typography/RichText", Button: "Button", Card: "item/Card"
+};
+await writeFile(new URL("index.js", lumosOutput), Object.entries(lumos)
+  .map(([name, file]) => `export { default as ${name} } from "../../src/lumos/components/${file}.astro";`)
+  .join("\n") + "\n", "utf8");

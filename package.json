@@ -1,15 +1,16 @@
 {
   "name": "@spark-line/web-framework",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Structural UI contracts and accessible primitives for Astro, optional React islands, and optional Sanity section data.",
   "type": "module",
   "license": "MIT",
   "sideEffects": [
-    "./styles/*.css"
+    "./styles/**/*.css"
   ],
   "files": [
     "dist/",
     "src/astro/",
+    "src/lumos/",
     "styles/",
     "starter/",
     "skills/",
@@ -43,7 +44,13 @@
       "default": "./dist/catalog/index.js"
     },
     "./styles/foundation.css": "./styles/foundation.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./lumos": {
+      "types": "./src/lumos/index.d.ts",
+      "import": "./dist/lumos/index.js",
+      "default": "./dist/lumos/index.js"
+    },
+    "./styles/lumos.css": "./styles/lumos.css"
   },
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/build.mjs",

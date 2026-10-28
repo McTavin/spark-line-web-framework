@@ -1,0 +1,10 @@
+---
+import { Section, Heading } from "@spark-line/web-framework/lumos";
+import "@spark-line/web-framework/styles/lumos.css";
+import LumosCounter from "../components/LumosCounter";
+---
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width" /><title>Lumos island boundary</title></head>
+  <body><main><Section><Heading tag="h1">React inside an Astro section</Heading><LumosCounter client:load initialCount={0} /></Section></main></body>
+</html>
