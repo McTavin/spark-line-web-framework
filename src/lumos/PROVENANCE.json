@@ -105,9 +105,10 @@
       "path": "styles/lumos/base.css",
       "changes": [
         "Replace eight template swatches with project-supplied --sl-* tokens and CSS system-color fallbacks.",
-        "Remove body overflow-x:clip so overflow remains visible and testable."
+        "Remove body overflow-x:clip so overflow remains visible and testable.",
+        "Use zero transition duration for reduced motion; a positive global duration otherwise adds transitions to static layout properties."
       ],
-      "sha256": "332db2f5ed870bf5c6e88e767c96283bc9c0a76b7b73a3ed0f1b5b468b456a45"
+      "sha256": "79e3fe1294e19c23dfa7fa007329b200654bf1c16876d5d41fe7d11ea0e375f2"
     },
     {
       "upstreamPath": "src/styles/patterns.css",
