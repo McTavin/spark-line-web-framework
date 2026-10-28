@@ -17,7 +17,7 @@ import "@spark-line/web-framework/styles/lumos.css";
           <Eyebrow>Source-pinned Astro components</Eyebrow>
           <Heading tag="h1" id="title" variant="h1">Lumos foundation</Heading>
           <Paragraph variant="large">Nimbus publishes content. Spark defines ownership. Lumos supplies this visual foundation.</Paragraph>
-          <Button element="link" href="#cards">Explore the cards</Button>
+          <div class="button-wrapper"><Button element="link" href="#cards">Explore the cards</Button></div>
         </ContentWrapper>
       </Section>
       <Section id="cards" aria-labelledby="cards-title" theme="dark">
@@ -42,8 +42,10 @@ import "@spark-line/web-framework/styles/lumos.css";
           </div>
           <div slot="column2">
             <Heading tag="h3" variant="h5">Native controls</Heading>
-            <Button type="button" data-native-button>Native button</Button>
-            <Button element="link" variant="link" href="#intro">Native anchor</Button>
+            <div class="button-wrapper">
+              <Button type="button" data-native-button>Native button</Button>
+              <Button element="link" variant="link" href="#intro">Native anchor</Button>
+            </div>
           </div>
         </ContentWrapper>
       </Section>
