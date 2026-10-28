@@ -26,18 +26,20 @@
       "upstreamBlob": "92e7c59148f3c0162ed728fc596bee8df23d0d05",
       "path": "src/lumos/components/wrapper/ContentWrapper.astro",
       "changes": [
-        "Replace upstream @/ imports with package-relative paths."
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
       ],
-      "sha256": "97ba0643613d8fa4b4ee410f56e933d0fcdf508f2d1a6194c16ad6e5d0d2877b"
+      "sha256": "698d759d4434cf3a65d9ea0dbe99d0607290b5a4e9fd0095e873d2513826ca33"
     },
     {
       "upstreamPath": "src/components/wrapper/Grid.astro",
       "upstreamBlob": "1fb52ae29576bd6346e6adb0ce8f0b3fdfa5b1ba",
       "path": "src/lumos/components/wrapper/Grid.astro",
       "changes": [
-        "Replace upstream @/ imports with package-relative paths."
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
       ],
-      "sha256": "bcf9d25457aab212a2a936bf9a8cc7aa08ccc34510a74ba7c268d3d77b2fcea0"
+      "sha256": "8f1d01bf42f26cda4710741f928131116b257e4494946b3c9a49f9a825d4f2a0"
     },
     {
       "upstreamPath": "src/components/typography/Heading.astro",
@@ -62,36 +64,40 @@
       "upstreamBlob": "4dd61f15d3c5d142b9f026529cc087267ddb626c",
       "path": "src/lumos/components/typography/Eyebrow.astro",
       "changes": [
-        "Replace upstream @/ imports with package-relative paths."
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
       ],
-      "sha256": "38fd4459d200ec7e7edeafefdb74ea7ed4ec921b8d0b1d52c438fd43a9a4c288"
+      "sha256": "e02a58df39c321d94ec42d4fbe2861db7783b3155b6144dfbe244fdd6aa71768"
     },
     {
       "upstreamPath": "src/components/typography/RichText.astro",
       "upstreamBlob": "2850d5a8bc77b30fcb94494411b669b6874f854c",
       "path": "src/lumos/components/typography/RichText.astro",
       "changes": [
-        "Replace upstream @/ imports with package-relative paths."
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
       ],
-      "sha256": "89260afe66a3727480e65078ccc1a30d2348a0235fae7e2e4873280d8213b624"
+      "sha256": "d5ca75e17849b39eace18cd83eef422780acfdf7ae571084b06ce08640d1c770"
     },
     {
       "upstreamPath": "src/components/Button.astro",
       "upstreamBlob": "720946261ebe32c8e42b0a5fb9c08fc6dec8a6e3",
       "path": "src/lumos/components/Button.astro",
       "changes": [
-        "Replace upstream @/ imports with package-relative paths."
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
       ],
-      "sha256": "b25b9e56644c856f0527d15d97f48aaf7dd57b7f480eedb30397ceed73d64fa9"
+      "sha256": "6f623149131b6131ba219fd27fef8320855c8730010b16c76329924168cc243d"
     },
     {
       "upstreamPath": "src/components/item/Card.astro",
       "upstreamBlob": "c1042830d008cc900a88560e7dd0af97fae6c6aa",
       "path": "src/lumos/components/item/Card.astro",
       "changes": [
-        "Replace upstream @/ imports with package-relative paths."
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
       ],
-      "sha256": "19363c8fd2fa3a624fbd63f77a8fc32108b093499de291ee5e67d767f1e1bb89"
+      "sha256": "c17035638d50ff80ff996d52dc8d8c90c88424bd780801e66c7e73bcadbc3890"
     },
     {
       "upstreamPath": "src/styles/base.css",
@@ -128,8 +134,10 @@
       "upstreamPath": "src/components/media/Icon.astro",
       "upstreamBlob": "451f0f6f26fb5eca85b2fd9dd7a73f80fa40f947",
       "path": "src/lumos/components/media/Icon.astro",
-      "changes": [],
-      "sha256": "bd4f315e09b3fbf8dba32ebb67dcd4ffbb19f420fdc94c836dbf919d2308970c"
+      "changes": [
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "4d411a6492d1ad8e6ac87dcadbc3b23d0eb4c67fddf7d525b2473c9d2dd1e7f6"
     },
     {
       "upstreamPath": "src/components/media/Img.astro",
@@ -142,8 +150,10 @@
       "upstreamPath": "src/components/media/Overlay.astro",
       "upstreamBlob": "f5621fb6083945f4b31cf4e301e02ba497c1c23d",
       "path": "src/lumos/components/media/Overlay.astro",
-      "changes": [],
-      "sha256": "6c98b1eceb80c64d6de0f83992f4410bae12dc0ec7a95706e38acaa85ace6d33"
+      "changes": [
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "d78fd535d30159cc4c2604224d24caf7e7f35f2f4957935452e92b5ecad2a29e"
     },
     {
       "upstreamPath": "src/components/wrapper/ButtonWrapper.astro",

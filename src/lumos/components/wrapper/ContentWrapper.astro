@@ -150,6 +150,8 @@ const column2 = await slotContent(Astro.slots, "column2");
 )}
 
 <style is:global>
+  /* Astro may emit component styles before the imported foundation. */
+  @layer base, patterns, components, utilities;
   @layer components {
     .layout {
       /* layout defaults */

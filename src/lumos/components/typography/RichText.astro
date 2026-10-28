@@ -56,6 +56,8 @@ const content = await slotContent(Astro.slots);
 )}
 
 <style is:global>
+  /* Astro may emit component styles before the imported foundation. */
+  @layer base, patterns, components, utilities;
   @layer components {
     .rich-text {
       & :is(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, figure, pre, table) {

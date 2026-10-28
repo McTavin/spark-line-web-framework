@@ -149,6 +149,8 @@ if (import.meta.env.DEV && render) {
 )}
 
 <style is:global>
+  /* Astro may emit component styles before the imported foundation. */
+  @layer base, patterns, components, utilities;
   @layer components {
     .card_wrap {
       --_padding: var(--space-6);

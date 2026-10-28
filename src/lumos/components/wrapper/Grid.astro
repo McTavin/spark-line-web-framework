@@ -136,6 +136,8 @@ const columns =
 )}
 
 <style is:global>
+  /* Astro may emit component styles before the imported foundation. */
+  @layer base, patterns, components, utilities;
   @layer components {
     .grid {
       --_cols: var(--_cols-xs);

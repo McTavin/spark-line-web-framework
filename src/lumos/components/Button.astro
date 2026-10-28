@@ -158,6 +158,8 @@ const named = {
 )}
 
 <style is:global>
+  /* Astro may emit component styles before the imported foundation. */
+  @layer base, patterns, components, utilities;
   @layer components {
     .button_wrap {
       display: inline-flex;

@@ -34,6 +34,8 @@ if (import.meta.env.DEV && render && !Svg) {
 )}
 
 <style is:global>
+  /* Astro may emit component styles before the imported foundation. */
+  @layer base, patterns, components, utilities;
   @layer components {
     .icon {
       --_size: 1.5em;
