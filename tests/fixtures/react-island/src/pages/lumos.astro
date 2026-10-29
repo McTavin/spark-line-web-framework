@@ -1,0 +1,69 @@
+---
+import { Section, ContentWrapper, Grid, Heading, Paragraph, Eyebrow, RichText, Button, Card } from "@spark-line/web-framework/lumos";
+import "@spark-line/web-framework/styles/lumos.css";
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Lumos foundation gallery</title>
+  </head>
+  <body>
+    <main>
+      <Section id="intro" aria-labelledby="title" theme="light">
+        <ContentWrapper>
+          <Eyebrow>Source-pinned Astro components</Eyebrow>
+          <Heading tag="h1" id="title" variant="h1">Lumos foundation</Heading>
+          <Paragraph variant="large">Nimbus publishes content. Spark defines ownership. Lumos supplies this visual foundation.</Paragraph>
+          <div class="button-wrapper"><Button element="link" href="#cards">Explore the cards</Button></div>
+        </ContentWrapper>
+      </Section>
+      <Section id="cards" aria-labelledby="cards-title" theme="dark">
+        <Heading tag="h2" id="cards-title" variant="h2">Independent section theme</Heading>
+        <Grid medium={2} large={3}>
+          <Card heading="Default card" headingTag="h3" text="Internal padding belongs to this surface." buttonHref="#reading" buttonLabel="Read the content" />
+          <Card variant="cover" image="/lumos-fixture.svg" imageAlt="Abstract navy rectangle" heading="Cover card" headingTag="h3" text="Its visual space is reserved." buttonHref="#reading" buttonLabel="Read cover details" />
+          <Card variant="stacked" image="/lumos-fixture.svg" imageAlt="Abstract navy rectangle" heading="Stacked card" headingTag="h3" text="Content stays in normal flow." buttonHref="#reading" buttonLabel="Read stacked details" />
+        </Grid>
+      </Section>
+      <Section id="reading" aria-labelledby="reading-title" theme="light" paddingTop="small" paddingBottom="small">
+        <ContentWrapper variant="columns">
+          <div>
+            <Eyebrow variant="tag">Reading</Eyebrow>
+            <Heading tag="h2" id="reading-title" variant="h2">Readable content</Heading>
+            <RichText maxWidth={65}>
+              <p>Long words and lists retain their semantic structure.</p>
+              <ul><li>Native Astro rendering</li><li>Zero React on this page</li></ul>
+              <ol><li>Choose a section</li><li>Supply project tokens</li></ol>
+              <a href="#intro">Return to the first section</a>
+            </RichText>
+          </div>
+          <div slot="column2">
+            <Heading tag="h3" variant="h5">Native controls</Heading>
+            <div class="button-wrapper">
+              <Button type="button" data-native-button>Native button</Button>
+              <Button element="link" variant="link" href="#intro">Native anchor</Button>
+            </div>
+          </div>
+        </ContentWrapper>
+      </Section>
+      <Section aria-label="Grid options" theme="brand">
+        <ContentWrapper variant="contain">
+          <Grid variant="autofit" minColumnWidth={12} maxColumnCount={2}>
+            <Paragraph>Auto-fit first cell.</Paragraph><Paragraph>Auto-fit second cell.</Paragraph>
+          </Grid>
+          <Grid variant="autofill" minColumnWidth={12} maxColumnCount={2}>
+            <Paragraph>Auto-fill first cell.</Paragraph><Paragraph>Auto-fill second cell.</Paragraph>
+          </Grid>
+        </ContentWrapper>
+      </Section>
+    </main>
+  </body>
+</html>
+<style is:global>
+  @layer base {
+    :root { --sl-surface: #ffffff; --sl-surface-raised: #ffffff; --sl-surface-muted: #f0f3f6; --sl-ink: #152338; --sl-ink-subtle: #26364b; --sl-ink-muted: #334760; --sl-accent: #285a8a; --sl-on-accent: #ffffff; }
+  }
+</style>

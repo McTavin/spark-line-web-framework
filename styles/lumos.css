@@ -1,0 +1,5 @@
+/* One foundation. Do not combine with foundation.css or a second reset. */
+@layer base, patterns, components, utilities;
+@import "./lumos/base.css" layer(base);
+@import "./lumos/patterns.css" layer(patterns);
+@import "./lumos/utilities.css" layer(utilities);

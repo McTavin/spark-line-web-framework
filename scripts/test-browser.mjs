@@ -72,6 +72,11 @@ try {
     });
     try {
       const page = await context.newPage();
+      const hydrationErrors = [];
+      page.on("pageerror", (error) => hydrationErrors.push(error.message));
+      page.on("console", (message) => {
+        if (message.type() === "error" && /hydration|hydrated|Minified React error/i.test(message.text())) hydrationErrors.push(message.text());
+      });
       await page.goto(`${origin}/`, { waitUntil: "networkidle" });
 
       await assertNoOverflow(page);
@@ -106,6 +111,38 @@ try {
         fullPage: true
       });
 
+      for (const width of [1440, 1024, 834, 390, 320]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(`${origin}/lumos/`, { waitUntil: "networkidle" });
+        await assertNoOverflow(page);
+        if (await page.locator("astro-island").count()) throw new Error("Static Lumos gallery hydrates");
+        const seams = await page.locator("main > section").evaluateAll((sections) => sections.map((section) => {
+          const box = section.getBoundingClientRect();
+          return { top: box.top, bottom: box.bottom, background: getComputedStyle(section).backgroundColor };
+        }));
+        for (let i = 1; i < seams.length; i++) {
+          if (Math.abs(seams[i].top - seams[i - 1].bottom) > 1) throw new Error("Lumos section seam changed");
+          if (seams[i].background === seams[i - 1].background) throw new Error("Lumos theme escaped its section");
+        }
+        const button = page.locator("[data-native-button]");
+        await button.focus();
+        await button.press("Tab");
+        await page.keyboard.press("Shift+Tab");
+        const focus = await button.evaluate((element) => ({ outline: getComputedStyle(element).outlineStyle, height: element.getBoundingClientRect().height }));
+        if (focus.outline === "none" || focus.height < 44) throw new Error(`Lumos button focus/target contract failed at ${width}: ${JSON.stringify(focus)}`);
+        await button.press("Enter");
+        await assertAccessible(page, `lumos-${width}`);
+        await page.screenshot({ path: path.join(screenshotDirectory, `lumos-${width}.png`), fullPage: true });
+      }
+      await page.getByRole("link", { name: "Return to the first section" }).click();
+      if (!page.url().endsWith("#intro")) throw new Error("Lumos native anchor failed");
+      await page.goto(`${origin}/lumos-island/`, { waitUntil: "networkidle" });
+      await verifyConsumerIsland(page);
+      if (await page.locator("astro-island").count() !== 1) throw new Error("Lumos island boundary changed");
+      await assertNoOverflow(page);
+      await assertAccessible(page, "lumos-island");
+      if (hydrationErrors.length) throw new Error(`Hydration errors: ${hydrationErrors.join("\n")}`);
+
       await writeFile(
         path.join(screenshotDirectory, "verification.json"),
         `${JSON.stringify(
@@ -114,6 +151,9 @@ try {
             viewports: ["1280x900", "390x844"],
             interactions: ["consumer-owned counter using React primitives"],
             staticStyleGuideHydrates: false,
+            lumosViewports: [1440, 1024, 834, 390, 320],
+            lumosStaticHydrates: false,
+            lumosReactIslandHydrates: true,
             accessibility: "axe:0 serious-or-critical violations",
             reducedMotion: true,
             horizontalOverflow: false

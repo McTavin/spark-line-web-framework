@@ -189,3 +189,33 @@ export const frameworkRegistry = defineComponentRegistry([
     composition: { profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID, role: "control", exceptions: [] }
   }
 ] as const);
+
+export const LUMOS_UPSTREAM = Object.freeze({
+  repository: "https://github.com/lumosframework/lumos-for-astro",
+  commit: "e9c07d2e59bc5fe6275b7b795f482661af0acff0"
+});
+
+/** Curated Astro surface; unrelated to the retired custom React controls. */
+export const lumosRegistry = defineComponentRegistry([
+  { id: "lumos.section", name: "Section", path: "wrapper/Section", role: "section", variants: ["inherit", "light", "dark", "brand"] },
+  { id: "lumos.content-wrapper", name: "ContentWrapper", path: "wrapper/ContentWrapper", role: "layout", variants: ["stack", "columns", "contain"] },
+  { id: "lumos.grid", name: "Grid", path: "wrapper/Grid", role: "layout", variants: ["columns", "autofit", "autofill"] },
+  { id: "lumos.heading", name: "Heading", path: "typography/Heading", role: "content", variants: ["h1", "h2", "h5"] },
+  { id: "lumos.paragraph", name: "Paragraph", path: "typography/Paragraph", role: "content", variants: ["inherit", "large"] },
+  { id: "lumos.eyebrow", name: "Eyebrow", path: "typography/Eyebrow", role: "content", variants: ["default", "tag"] },
+  { id: "lumos.rich-text", name: "RichText", path: "typography/RichText", role: "content", variants: ["inherit"] },
+  { id: "lumos.button", name: "Button", path: "Button", role: "control", variants: ["main", "link"] },
+  { id: "lumos.card", name: "Card", path: "item/Card", role: "surface", variants: ["default", "cover", "stacked"] }
+].map(({ role, ...definition }) => ({
+  ...definition,
+  kind: "primitive" as const,
+  status: "stable" as const,
+  provenance: `${LUMOS_UPSTREAM.repository}@${LUMOS_UPSTREAM.commit}; MIT; src/lumos/PROVENANCE.json`,
+  scenarios: [{ id: "foundation", label: "Lumos foundation gallery" }],
+  composition: {
+    profile: WEB_FRAMEWORK_LAYOUT_PROFILE_ID,
+    role: role as CompositionRole,
+    exceptions: definition.id === "lumos.section" ? ["Section includes its own container; do not nest a legacy container."] :
+      definition.id === "lumos.content-wrapper" ? ["Only stack, columns and contain are curated; breakout/sticky/card layouts need project review."] : []
+  }
+})));

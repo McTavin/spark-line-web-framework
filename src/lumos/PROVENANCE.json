@@ -1,0 +1,200 @@
+{
+  "repository": "https://github.com/lumosframework/lumos-for-astro",
+  "commit": "e9c07d2e59bc5fe6275b7b795f482661af0acff0",
+  "templateVersion": "1.0.1",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2026 Timothy Ricks",
+  "files": [
+    {
+      "upstreamPath": "LICENSE",
+      "upstreamBlob": "da54c0dc87eb2e7e6263c38a76bc00dbd66b71bc",
+      "path": "src/lumos/LICENSE",
+      "changes": [],
+      "sha256": "6ab899e8d399706005cdbf74688d7a1fafc7aa2b0727ceee14acb3e579095630"
+    },
+    {
+      "upstreamPath": "src/components/wrapper/Section.astro",
+      "upstreamBlob": "85c56d08c0753bd4debc1b6f5662ec94fbf613b4",
+      "path": "src/lumos/components/wrapper/Section.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths."
+      ],
+      "sha256": "e7126322da344f16c937878f40a1c23f4b5beb9221bda2aa620380f0fdcd68b3"
+    },
+    {
+      "upstreamPath": "src/components/wrapper/ContentWrapper.astro",
+      "upstreamBlob": "92e7c59148f3c0162ed728fc596bee8df23d0d05",
+      "path": "src/lumos/components/wrapper/ContentWrapper.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "698d759d4434cf3a65d9ea0dbe99d0607290b5a4e9fd0095e873d2513826ca33"
+    },
+    {
+      "upstreamPath": "src/components/wrapper/Grid.astro",
+      "upstreamBlob": "1fb52ae29576bd6346e6adb0ce8f0b3fdfa5b1ba",
+      "path": "src/lumos/components/wrapper/Grid.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "8f1d01bf42f26cda4710741f928131116b257e4494946b3c9a49f9a825d4f2a0"
+    },
+    {
+      "upstreamPath": "src/components/typography/Heading.astro",
+      "upstreamBlob": "67ab88970d2a7ff8360f5749419886cc6fe0ab98",
+      "path": "src/lumos/components/typography/Heading.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths."
+      ],
+      "sha256": "21a3a764d1b5c38011dcf04f32880e6bea0ab54e83f4232edb6c002f9b47f8c3"
+    },
+    {
+      "upstreamPath": "src/components/typography/Paragraph.astro",
+      "upstreamBlob": "d6bcd9f659cc52055c8146e5fbf0bd430bf1d1fc",
+      "path": "src/lumos/components/typography/Paragraph.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths."
+      ],
+      "sha256": "d404b5c4acb746d13ad5d20c7f97521cc6fcdc3528abd9d5c3c4a559e02506b7"
+    },
+    {
+      "upstreamPath": "src/components/typography/Eyebrow.astro",
+      "upstreamBlob": "4dd61f15d3c5d142b9f026529cc087267ddb626c",
+      "path": "src/lumos/components/typography/Eyebrow.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "e02a58df39c321d94ec42d4fbe2861db7783b3155b6144dfbe244fdd6aa71768"
+    },
+    {
+      "upstreamPath": "src/components/typography/RichText.astro",
+      "upstreamBlob": "2850d5a8bc77b30fcb94494411b669b6874f854c",
+      "path": "src/lumos/components/typography/RichText.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "d5ca75e17849b39eace18cd83eef422780acfdf7ae571084b06ce08640d1c770"
+    },
+    {
+      "upstreamPath": "src/components/Button.astro",
+      "upstreamBlob": "720946261ebe32c8e42b0a5fb9c08fc6dec8a6e3",
+      "path": "src/lumos/components/Button.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS.",
+        "Enforce a 44px minimum button/link target height required by Spark interaction contracts."
+      ],
+      "sha256": "e2d88c53cefbb240b29f75f3b8684c9045af2a8543813513acb6e68ff7fffea7"
+    },
+    {
+      "upstreamPath": "src/components/item/Card.astro",
+      "upstreamBlob": "c1042830d008cc900a88560e7dd0af97fae6c6aa",
+      "path": "src/lumos/components/item/Card.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths.",
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "c17035638d50ff80ff996d52dc8d8c90c88424bd780801e66c7e73bcadbc3890"
+    },
+    {
+      "upstreamPath": "src/styles/base.css",
+      "upstreamBlob": "f3bd432ae822ddfd0d4b16886a845b01cd4ced98",
+      "path": "styles/lumos/base.css",
+      "changes": [
+        "Replace eight template swatches with project-supplied --sl-* tokens and CSS system-color fallbacks.",
+        "Remove body overflow-x:clip so overflow remains visible and testable.",
+        "Use zero transition duration for reduced motion; a positive global duration otherwise adds transitions to static layout properties."
+      ],
+      "sha256": "79e3fe1294e19c23dfa7fa007329b200654bf1c16876d5d41fe7d11ea0e375f2"
+    },
+    {
+      "upstreamPath": "src/styles/patterns.css",
+      "upstreamBlob": "33a386c937d2ffb1eb9ce5c287a0001c35e75353",
+      "path": "styles/lumos/patterns.css",
+      "changes": [],
+      "sha256": "63a69c93dbb156440941be41d615e3147bdb7c4f0eb69170f3480ce9d036eae4"
+    },
+    {
+      "upstreamPath": "src/styles/utilities.css",
+      "upstreamBlob": "75d78d25a576d8d41855c5b955ee195d4ac72a31",
+      "path": "styles/lumos/utilities.css",
+      "changes": [],
+      "sha256": "5cc0250beae8d1997692ca0b832b1498016268cec350dc59d4f00efff4f36cd2"
+    },
+    {
+      "upstreamPath": "src/utils/slots.ts",
+      "upstreamBlob": "367d8b66cd9a2655b4f88a5d6e71867bf25786bd",
+      "path": "src/lumos/utils/slots.ts",
+      "changes": [
+        "Preserve comments within meaningful slot HTML so React/Astro SSR hydration markers survive; still omit empty comment-only slots."
+      ],
+      "sha256": "71bfd3ca31e1d821eb9e134935dbf26ebc24c86b257a18767f80ab2329141a37"
+    },
+    {
+      "upstreamPath": "src/components/media/Icon.astro",
+      "upstreamBlob": "451f0f6f26fb5eca85b2fd9dd7a73f80fa40f947",
+      "path": "src/lumos/components/media/Icon.astro",
+      "changes": [
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "4d411a6492d1ad8e6ac87dcadbc3b23d0eb4c67fddf7d525b2473c9d2dd1e7f6"
+    },
+    {
+      "upstreamPath": "src/components/media/Img.astro",
+      "upstreamBlob": "ba9eeda65420d4b0b9c726fc7169ddeef23d3134",
+      "path": "src/lumos/components/media/Img.astro",
+      "changes": [],
+      "sha256": "d01f584c6e7de7f56fc180e052811cd67dbaf84657fa940c431f32f471f4d88d"
+    },
+    {
+      "upstreamPath": "src/components/media/Overlay.astro",
+      "upstreamBlob": "f5621fb6083945f4b31cf4e301e02ba497c1c23d",
+      "path": "src/lumos/components/media/Overlay.astro",
+      "changes": [
+        "Declare the shared layer order before component rules; package imports may be hoisted before foundation CSS."
+      ],
+      "sha256": "d78fd535d30159cc4c2604224d24caf7e7f35f2f4957935452e92b5ecad2a29e"
+    },
+    {
+      "upstreamPath": "src/components/wrapper/ButtonWrapper.astro",
+      "upstreamBlob": "9049b49eaed235bbc0b08d88a679ee677418e69f",
+      "path": "src/lumos/components/wrapper/ButtonWrapper.astro",
+      "changes": [
+        "Replace upstream @/ imports with package-relative paths."
+      ],
+      "sha256": "c67636524b55d47a6707c9641549f65f0c2ab8fd7c139fedde7c8e7e5c1cfd81"
+    },
+    {
+      "upstreamPath": "src/assets/icons/arrow-full.svg",
+      "upstreamBlob": "40f13a5f617711fd39c1a99cf98cade88cdf7fe0",
+      "path": "src/lumos/assets/icons/arrow-full.svg",
+      "changes": [],
+      "sha256": "edda4c6b3fc528f884f7dd22c39b713970e114d2d4c01d15232e67844d98cb60"
+    },
+    {
+      "upstreamPath": "src/assets/icons/close.svg",
+      "upstreamBlob": "efe446fa43dc5accd5a361b7680b741fc1cbb3ce",
+      "path": "src/lumos/assets/icons/close.svg",
+      "changes": [],
+      "sha256": "d0a9c0d6fcd5e5a916d65f43aa0e598a0e4006875b05af48d27ca9e816342eb7"
+    },
+    {
+      "upstreamPath": "src/assets/icons/play.svg",
+      "upstreamBlob": "3336faaf36c8f9e1e059bd4b7e1689b19ea1ddd6",
+      "path": "src/lumos/assets/icons/play.svg",
+      "changes": [],
+      "sha256": "b344fc8debd8f3d93b2a2401eca88bb2962e3d3f42acbf6e05e3959d32d76823"
+    },
+    {
+      "upstreamPath": "src/assets/icons/pause.svg",
+      "upstreamBlob": "31489aea705b1023dfe2e39f99ddc6500a955941",
+      "path": "src/lumos/assets/icons/pause.svg",
+      "changes": [],
+      "sha256": "5d9ff892b13f88f7e2c205746c059da26358dcc414d3cf6c76669051c6567fa8"
+    }
+  ]
+}

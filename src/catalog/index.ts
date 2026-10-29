@@ -1,5 +1,5 @@
 import type { CatalogScenario, ComponentComposition, ComponentKind, ComponentStatus, CompositionRole } from "../registry/index.js";
-import { frameworkRegistry, WEB_FRAMEWORK_LAYOUT_PROFILE_ID } from "../registry/index.js";
+import { frameworkRegistry, lumosRegistry, LUMOS_UPSTREAM, WEB_FRAMEWORK_LAYOUT_PROFILE_ID } from "../registry/index.js";
 
 export { WEB_FRAMEWORK_LAYOUT_PROFILE_ID };
 
@@ -329,7 +329,7 @@ export function createFrameworkCatalogManifest({
         },
         package: {
           name: "@spark-line/web-framework",
-          version: "0.2.1",
+          version: "0.3.0",
           export: framework === "astro" ? "./astro" : "./react"
         },
         composition: definition.composition!,
@@ -343,5 +343,27 @@ export function createFrameworkCatalogManifest({
     composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
     content_profiles: [WEB_FRAMEWORK_SANITY_PROFILE],
     components
+  });
+}
+
+/** Separate catalog: Lumos has no React parity claim. */
+export function createLumosCatalogManifest({ commit, repository = "https://github.com/McTavin/spark-line-web-framework.git" }: {
+  commit: string; repository?: string;
+}): Readonly<CatalogManifest> {
+  return defineCatalogManifest({
+    schema_version: CATALOG_SCHEMA_VERSION,
+    generated_from: { repository, path: "src/catalog/index.ts", commit },
+    composition_profiles: [WEB_FRAMEWORK_LAYOUT_PROFILE],
+    content_profiles: [],
+    components: lumosRegistry.components.map((definition) => ({
+      id: definition.id, name: definition.name, framework: "astro", kind: definition.kind,
+      scope: "system", variants: definition.variants, scenarios: definition.scenarios, status: definition.status,
+      source: { repository, commit, path: `src/lumos/components/${definition.path}.astro` },
+      package: { name: "@spark-line/web-framework", version: "0.3.0", export: "./lumos" },
+      lineage: { component_id: definition.id, source: { ...LUMOS_UPSTREAM, path: `src/components/${definition.path}.astro` } },
+      assets: [{ id: "lumos-mit", kind: "license", status: "available", note: "src/lumos/LICENSE" }],
+      composition: definition.composition,
+      tags: ["lumos", "astro", "presentational"]
+    }))
   });
 }
